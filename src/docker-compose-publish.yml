@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  aem-publish:
+    container_name: aem-publish
+    image: aem-publish:latest
+    volumes:
+      - type: volume
+        source: aem-publish-data
+        target: /opt/aem/publish/crx-quickstart
+    command: [ "java",
+               "-Xmx4096M",
+               "-Djava.awt.headless=true",
+               "-XX:+UseParallelGC", "--add-opens=java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED", "--add-opens=java.base/sun.net.www.protocol.jrt=ALL-UNNAMED", "--add-opens=java.naming/javax.naming.spi=ALL-UNNAMED", "--add-opens=java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED", "--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED", "--add-opens=java.base/java.net=ALL-UNNAMED", "-Dnashorn.args=--no-deprecation-warning",
+               "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8889",
+               "-Dadmin.password.file=/opt/aem/publish/passwordfile.properties",
+               "-Dsling.run.modes=publish,samplecontent,local",
+               "-jar", "/opt/aem/publish/aem-quickstart-6.5.0.jar",
+               "-nointeractive",
+               "-port", "4503",
+               "-nofork",
+               "-nobrowser" ]
+#   AEM is started for the first time during the image build, hence passing
+#   the password file during container startup is idle. However, the following
+#   secrets section is retained in case the image build definition changes:
+#    secrets:
+#      - source: admin-password
+#        target: /opt/aem/publish/passwordfile.properties
+#        mode: 0444
+    network_mode: "host"
+#   In case of `network_mode` set to `host` ports publishing should be disabled:
+#    ports:
+#      - target: 4503
+#        published: 4503
+#
+#      - target: 8889
+#        published: 8889
+#    networks:
+#      - aem
+
+# See the comment above on secrets
+#secrets:
+#  admin-password:
+#    file: 3_publish/passwordfile.properties
+
+volumes:
+  aem-publish-data:
+    name: "aem-publish-data"
+
+# See the comment above on ports publishing
+#networks:
+#  aem:
+#    name: aem

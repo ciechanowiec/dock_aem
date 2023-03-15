@@ -1,0 +1,260 @@
+[.text-justify]
+= Dock AEM
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+// Docinfo is used for foldable TOC.
+// -> For full usage example see https://github.com/remkop/picocli
+:docinfo: shared,private
+:linkcss:
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+
+== Overview
+
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager 6.5 development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish and AEM Dispatcher/Varnish Cache instances. Remarkably, with _Dock AEM_ the time required for the first start of a fully fledged AEM instance is reduced by ~90% comparing to a classical startup (~12 min -> ~1 min 15 sec).
+
+== Usage
+=== Images Build
+==== Dockerfiles
+_Dock AEM_ delivers five `Dockerfile`++s++ that build the following generic images:
+[upperalpha]
+. `src/1_base/Dockerfile` - builds Java 11 image, that is reused as the base for AEM Author and AEM Publish images
+. `src/2_author/Dockerfile` - builds AEM Author image
+. `src/3_publish/Dockerfile` - builds AEM Publish image
+. `src/4_dispatcher/Dockerfile` - builds AEM Dispatcher image
+. `src/5_varnish/Dockerfile` - builds Varnish Cache image
+
+The above `Dockerfile`++s++ can be used separately in order to subsequently build all five images. However, this might be cumbersome. Therefore, there is a `src/docker-compose-build.yml` file that provides possibility to build all five images at once.
+
+==== Steps
+In order to build _Dock AEM_ images follow the steps below.
+[upperalpha]
+. Clone this repository:
++
+[source, bash]
+----
+git clone https://github.com/ciechanowiec/dock_aem
+----
+
+. Remove all old _Dock AEM_ containers, images, volumes and networks:
++
+[source, bash]
+----
+docker container stop --time 30 aem-author aem-publish dispatcher varnish
+
+docker container remove --force aem-author aem-publish dispatcher varnish
+
+docker image remove --force aem-base aem-author aem-publish dispatcher varnish
+
+docker volume remove --force aem-author-data aem-publish-data
+
+docker network remove --force aem
+----
+
+. `src/resources`
++
+Put two following files into `src/resources` directory in this repository (files inside `src/resources` are git-ignored, so there is no risk of exposing them in the source control):
+[upperroman]
+.. `aem-quickstart-6.5.0.jar`
+.. `license.properties`
+
+. `src/packages`
++
+If there are any Apache Jackrabbit FileVault packages that should be preinstalled on AEM Author and AEM Publish, put them into `src/packages` directory in this repository (files inside `src/packages`, just like files inside `src/resources`, are git-ignored, so there is no risk of exposing them in the source control). For instance, those packages could be the following ones:
+[upperroman]
+.. `aem-service-pkg-6.5.14.0.zip` (AEM Service Pack 6.5.14)
+.. `adobe-aemfd-linux-pkg-6.0.772.zip` (AEM Forms Addon related to AEM 6.5.14)
+.. `content.zip` (preinstalled content)
+
+. During the images build, AEM Author and AEM Publish instances are started. This is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_author/installer.sh` and `src/3_publish/installer.sh` scripts respectively. Those scripts also shutdown the instances once the initialization is finished.
++
+The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages`. For instance, for a clean AEM 6.5.0 instance without any preinstalled packages, the expected amount of bundles is 581, while the amount of bundles for an AEM 6.5.0 instance with a preinstalled AEM Service Pack 6.5.14 is 610. For that reason, before starting the build, specify in the initialization scripts, i.e. in `src/2_author/installer.sh` and `src/3_publish/installer.sh`, the amount of expected bundles.
+
+. Go to `src` directory in this repository. Inside that directory, run the build defined in the `docker-compose-build.yml` file. As a result, five images will be built: `aem-base`, `aem-author`, `aem-publish`, `dispatcher` and `varnish`. For fully fledged AEM instances the build might take ~25 minutes in total, depending on hardware capabilities:
++
+[source, bash]
+----
+cd "$pathToRepository/src"
+
+docker compose --file docker-compose-build.yml build
+----
+
+. Verify the build and make sure that all five _Dock AEM_ images are available on host:
++
+[source, bash]
+----
+❯ docker images
+REPOSITORY       TAG       IMAGE ID       CREATED          SIZE
+aem-base         latest    bfa5138f41f9   17 minutes ago   551MB
+aem-author       latest    a6e2a1121f1a   16 minutes ago   12.2GB
+aem-publish      latest    646c9030e37f   3 minutes ago    11.2GB
+dispatcher       latest    13f0b135a185   1 minute ago     288MB
+varnish          latest    f4888874c28a   1 minute ago     333MB
+----
+
+=== Container Run, Start & Stop
+[upperalpha]
+. All containers based on _Dock AEM_ images can be run, started and stopped independently.
+. In order to run a given container for the first time, use Docker Compose files located inside `src` directory in this repository:
++
+[source, bash]
+----
+# AEM Author:
+docker compose --file docker-compose-author.yml up --detach
+
+# AEM Publish:
+docker compose --file docker-compose-publish.yml up --detach
+
+# AEM Dispatcher:
+docker compose --file docker-compose-dispatcher.yml up --detach
+
+# Varnish Cache:
+docker compose --file docker-compose-varnish.yml up --detach
+----
+
+. After the first run a given container can be started and stopped via regular Docker commands:
++
+[source, bash]
+----
+# AEM Author:
+docker start aem-author
+docker stop aem-author
+
+# AEM Publish:
+docker start aem-publish
+docker stop aem-publish
+
+# AEM Dispatcher:
+docker start dispatcher
+docker stop dispatcher
+
+# Varnish Cache:
+docker start varnish
+docker stop varnish
+----
+
+=== AEM Dispatcher & Varnish Cache Reloads
+[upperalpha]
+. In order to transfer files (first of all new configuration files) from the host into a container in which AEM Dispatcher or Varnish Cache are run, use commands constructed in the following way:
++
+[source, bash]
+----
+# AEM Dispatcher:
+docker cp "$HOME/dispatcher.any" dispatcher:/etc/apache2/conf/dispatcher.any
+
+# Varnish Cache:
+docker cp "$HOME/default.vcl" varnish:/etc/varnish/default.vcl
+----
+
+. In order to activate new configuration of AEM Dispatcher or Varnish Cache, there is no need to restart containers. New configuration can be applied via reloading:
++
+[source, bash]
+----
+# AEM Dispatcher:
+docker exec dispatcher /etc/init.d/apache2 reload
+
+# Varnish Cache:
+docker exec varnish varnishreload
+----
+
+=== Mobile Volumes
+[upperalpha]
+. Persistence layers of AEM Author and AEM Publish instances are linked to `/opt/aem/author/crx-quickstart` and `/opt/aem/publish/crx-quickstart` paths inside respective containers. Those paths are mount points for `aem-author-data` and `aem-publish-data` volumes stored on a host at `/var/lib/docker/volumes` and managed by Docker. It means that persistence layers of AEM Author and AEM Publish instances are separated from the application.
+
+. If `aem-author-data` or `aem-publish-data` volume doesn't exist when a container with AEM Author or AEM Publish respectively is run for the first time, then a respective volume will be created and mounted to the container. However, if a respective volume does already exist, then no new volume will be created and the existing one will be reused, so that even to a new container the old volume with old persistence layer will be mounted. In order to avoid such reuse, before a new container is run for the first time, the respective volume should be priorly removed:
++
+[source, bash]
+----
+# AEM Author:
+docker volume remove --force aem-author-data
+
+# AEM Publish:
+docker volume remove --force aem-publish-data
+----
+
+. The described volumes mechanism make AEM Author and AEM Publish persistence layers mobile, transferable and backupable. That mechanism can be rolled out to remote environments in order to make those environments fully reproducible locally.
+
+== Start Command Decomposition
+This section explains every part of commands used to start AEM instances. The explanation employs an example based on the command for the AEM Author, but nevertheless for AEM Publish the command is analogous.
+
+[upperalpha]
+. Set max heap size:
++
+`-Xmx4096M`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/deploy.html?lang=en (`-Xmx1024M` is given as recommended, but it is too little for parallel garbage collection)
+
+. Run AEM in a headless mode because it is run inside a Docker container:
++
+`-Djava.awt.headless=true`
+
+. Set JVM specific parameters for Java 11:
++
+`-XX:+UseParallelGC --add-opens=java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED --add-opens=java.base/sun.net.www.protocol.jrt=ALL-UNNAMED --add-opens=java.naming/javax.naming.spi=ALL-UNNAMED --add-opens=java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED -Dnashorn.args=--no-deprecation-warning`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/custom-standalone-install.html?lang=en
+
+. Run AEM in debug mode on the given port, additionally to the basic port:
++
+`-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8888`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-learn/cloud-service/debugging/debugging-aem-sdk/remote-debugging.html?lang=en
+
+. Set initial admin password in non-interactive mode. The admin password from
+`passwordfile.properties` file is assessed only during the first AEM start. If after the first AEM start the admin password is changed, the new password is effective:
++
+`-Dadmin.password.file=/opt/aem/author/passwordfile.properties` +
+(...) +
+`-nointeractive`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-65/administering/security/security-configure-admin-password.html?lang=en
+
+. Set run modes:
++
+`-Dsling.run.modes=author,samplecontent,local`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/configuring/configure-runmodes.html?lang=en
+
+. Set port:
++
+`-port 4502`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+
+. Exclude forks (among others, it mitigates warnings in the console):
++
+`-nofork`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+
+. Don't open AEM in a browser, since AEM is run inside a Docker container:
++
+`-nobrowser`
++
+_Docs:_ +
+https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+
+== License
+The program is subject to MIT No Attribution License
+
+Copyright © 2023 Herman Ciechanowiec
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
+
+The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.

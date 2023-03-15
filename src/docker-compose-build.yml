@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  aem-base:
+    build:
+      context: .
+      dockerfile: 1_base/Dockerfile
+    image: aem-base:latest
+
+  aem-author:
+    build:
+      context: .
+      dockerfile: 2_author/Dockerfile
+    image: aem-author:latest
+    depends_on:
+      - aem-base
+
+  aem-publish:
+    build:
+      context: .
+      dockerfile: 3_publish/Dockerfile
+    image: aem-publish:latest
+    depends_on:
+      - aem-base
+      - aem-author
+
+  dispatcher:
+    build:
+      context: .
+      dockerfile: 4_dispatcher/Dockerfile
+    image: dispatcher:latest
+    depends_on:
+      - aem-base
+      - aem-author
+      - aem-publish
+
+  varnish:
+    build:
+      context: .
+      dockerfile: 5_varnish/Dockerfile
+    image: varnish:latest
+    depends_on:
+      - aem-base
+      - aem-author
+      - aem-publish
+      - dispatcher

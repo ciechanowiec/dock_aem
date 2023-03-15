@@ -1,0 +1,17 @@
+*.class
+*.iml
+*.log*
+*.logs*
+logs
+log
+.idea
+.vscode
+target
+# Don't keep proprietary files in git:
+/src/resources/*
+!src/resources/.gitkeep
+/src/packages/*
+!src/packages/.gitkeep
+# Compiled documentation:
+README.html
+README.pdf
