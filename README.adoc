@@ -213,7 +213,7 @@ _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-learn/cloud-service/debugging/debugging-aem-sdk/remote-debugging.html?lang=en
 
 . Set initial admin password in non-interactive mode. The admin password from
-`passwordfile.properties` file is assessed only during the first AEM start. If after the first AEM start the admin password is changed, the new password is effective:
+a `passwordfile.properties` file is assessed only during the first AEM start. If after the first AEM start the admin password is changed, the new password is effective regardless of the content of a `passwordfile.properties` file:
 +
 `-Dadmin.password.file=/opt/aem/author/passwordfile.properties` +
 (...) +
