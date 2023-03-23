@@ -234,21 +234,21 @@ https://experienceleague.adobe.com/docs/experience-manager-65/deploying/configur
 `-port 4502`
 +
 _Docs:_ +
-https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/custom-standalone-install.html?lang=en
 
 . Exclude forks (among others, it mitigates warnings in the console):
 +
 `-nofork`
 +
 _Docs:_ +
-https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/custom-standalone-install.html?lang=en
 
 . Don't open AEM in a browser, since AEM is run inside a Docker container:
 +
 `-nobrowser`
 +
 _Docs:_ +
-https://experienceleague.adobe.com/docs/experience-manager-64/deploying/deploying/custom-standalone-install.html?lang=en
+https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/custom-standalone-install.html?lang=en
 
 == License
 The program is subject to MIT No Attribution License
