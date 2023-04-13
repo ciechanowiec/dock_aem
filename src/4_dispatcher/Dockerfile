@@ -25,8 +25,8 @@ RUN curl --output /tmp/dispatcher/dispatcher.tar.gz https://download.macromedia.
 RUN tar --extract --verbose --file dispatcher.tar.gz
 
 RUN cp --verbose dispatcher-apache2.4-4.3.5.so /usr/lib/apache2/modules/mod_dispatcher.so
-RUN cp --verbose conf/dispatcher.any /etc/apache2/conf
 COPY ../4_dispatcher/apache2.conf /etc/apache2/apache2.conf
+COPY ../4_dispatcher/dispatcher.any /etc/apache2/conf/dispatcher.any
 COPY ../4_dispatcher/httpd-dispatcher.conf /etc/apache2/extra
 
 WORKDIR /etc/apache2
