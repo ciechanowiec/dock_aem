@@ -142,8 +142,9 @@ docker start varnish
 docker stop varnish
 ----
 
-=== AEM Dispatcher & Varnish Cache Reloads
+=== AEM Dispatcher & Varnish Cache Specifics
 [upperalpha]
+. AEM Dispatcher and Varnish Cache configuration files used during images build are the default ones, but adjusted as little as possible according to the official instructions. The original versions of the configuration files for the sake of comparison are kept in respective directories besides the changed ones.
 . In order to transfer files (first of all new configuration files) from the host into a container in which AEM Dispatcher or Varnish Cache are run, use commands constructed in the following way:
 +
 [source, bash]
