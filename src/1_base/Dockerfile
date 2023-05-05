@@ -8,4 +8,6 @@ RUN apt install less -y && \
     apt install jq -y && \
     apt install vim -y && \
     apt install tree -y && \
-    apt install wget -y
+    apt install wget -y && \
+    apt install ffmpeg -y
+# ffmpeg is requried to generate video renditions
