@@ -87,6 +87,9 @@ cd "$pathToRepository/src"
 
 docker compose --file docker-compose-build.yml build
 ----
++
+[NOTE]
+In case of certain system setups, the command above should be hyphenated: `docker-compose`.
 
 . Verify the build and make sure that all five _Dock AEM_ images are available on host:
 +
@@ -120,6 +123,9 @@ docker compose --file docker-compose-dispatcher.yml up --detach
 # Varnish Cache:
 docker compose --file docker-compose-varnish.yml up --detach
 ----
++
+[NOTE]
+In case of certain system setups, the command above should be hyphenated: `docker-compose`.
 
 . After the first run a given container can be started and stopped via regular Docker commands:
 +
