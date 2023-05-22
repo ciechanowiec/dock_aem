@@ -30,7 +30,8 @@ updateActualStatus () {
 #  581 bundles active - clean AEM 6.5.0
 #  610 bundles active - clean AEM 6.5.0 + 6.5.14 Service Pack
 #  722 bundles active - clean AEM 6.5.0 + 6.5.14 Service Pack + 6.0.772 AEM Forms Addon
-expectedStatus="722 bundles active"
+#  723 bundles active - clean AEM 6.5.0 + 6.5.16 Service Pack + 6.0.914 AEM Forms Addon
+expectedStatus="723 bundles active"
 actualStatus=""
 isInitializationFinalized=false
 
