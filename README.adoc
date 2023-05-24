@@ -20,20 +20,21 @@
 
 == Overview
 
-_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager 6.5 development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish and AEM Dispatcher/Varnish Cache instances. Remarkably, with _Dock AEM_ the time required for the first start of a fully fledged AEM instance is reduced by ~90% comparing to a classical startup (~12 min -> ~1 min 15 sec).
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager 6.5 development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish and AEM Dispatcher/Varnish Cache instances. Remarkably, with _Dock AEM_ the time required for the first start of a fully fledged AEM instance is reduced by ~90% comparing to a classical startup (~12 min -> ~1 min 15 sec, depending on the machine).
 
 == Usage
 === Images Build
 ==== Dockerfiles
-_Dock AEM_ delivers five `Dockerfile`++s++ that build the following generic images:
+_Dock AEM_ delivers six `Dockerfile`++s++ that build the following generic images:
 [upperalpha]
 . `src/1_base/Dockerfile` - builds Java 11 image, that is reused as the base for AEM Author and AEM Publish images
 . `src/2_author/Dockerfile` - builds AEM Author image
 . `src/3_publish/Dockerfile` - builds AEM Publish image
-. `src/4_dispatcher/Dockerfile` - builds AEM Dispatcher image
+. `src/4_dispatcher/Dockerfile-AMD` - builds AEM Dispatcher image for AMD CPU architecture
+. `src/4_dispatcher/Dockerfile-ARM` - builds AEM Dispatcher image for ARM CPU architecture
 . `src/5_varnish/Dockerfile` - builds Varnish Cache image
 
-The above `Dockerfile`++s++ can be used separately in order to subsequently build all five images. However, this might be cumbersome. Therefore, there is a `src/docker-compose-build.yml` file that provides possibility to build all five images at once.
+The above `Dockerfile`++s++ can be used separately in order to subsequently build all six images. However, this might be cumbersome. Therefore, there is a `src/docker-compose-build.yml` file that provides possibility to build all six images at once.
 
 ==== Steps
 In order to build _Dock AEM_ images follow the steps below.
@@ -49,11 +50,11 @@ git clone https://github.com/ciechanowiec/dock_aem
 +
 [source, bash]
 ----
-docker container stop --time 30 aem-author aem-publish dispatcher varnish
+docker container stop --time 30 aem-author aem-publish dispatcher-amd dispatcher-arm varnish
 
-docker container remove --force aem-author aem-publish dispatcher varnish
+docker container remove --force aem-author aem-publish dispatcher-amd dispatcher-arm varnish
 
-docker image remove --force aem-base aem-author aem-publish dispatcher varnish
+docker image remove --force aem-base aem-author aem-publish dispatcher-amd dispatcher-arm varnish
 
 docker volume remove --force aem-author-data aem-publish-data
 
@@ -71,15 +72,15 @@ Put two following files into `src/resources` directory in this repository (files
 +
 If there are any Apache Jackrabbit FileVault packages that should be preinstalled on AEM Author and AEM Publish, put them into `src/packages` directory in this repository (files inside `src/packages`, just like files inside `src/resources`, are git-ignored, so there is no risk of exposing them in the source control). For instance, those packages could be the following ones:
 [upperroman]
-.. `aem-service-pkg-6.5.14.0.zip` (AEM Service Pack 6.5.14)
-.. `adobe-aemfd-linux-pkg-6.0.772.zip` (AEM Forms Addon related to AEM 6.5.14)
+.. `aem-service-pkg-6.5.16-NPR-40551-B002.zip` (AEM Service Pack 6.5.16)
+.. `adobe-aemfd-linux-pkg-6.0.914.zip` (AEM Forms Addon related to AEM 6.5.16)
 .. `content.zip` (preinstalled content)
 
 . During the images build, AEM Author and AEM Publish instances are started. This is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_author/installer.sh` and `src/3_publish/installer.sh` scripts respectively. Those scripts also shutdown the instances once the initialization is finished.
 +
-The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages`. For instance, for a clean AEM 6.5.0 instance without any preinstalled packages, the expected amount of bundles is 581, while the amount of bundles for an AEM 6.5.0 instance with a preinstalled AEM Service Pack 6.5.14 is 610. For that reason, before starting the build, specify in the initialization scripts, i.e. in `src/2_author/installer.sh` and `src/3_publish/installer.sh`, the amount of expected bundles.
+The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages` and on `samplecontent`/`nosamplecontent` run mode choice. For instance, for a clean AEM 6.5.0 instance without any preinstalled packages and a `samplecontent` run mode, the expected amount of bundles is 577, while the amount of bundles for an AEM 6.5.0 instance with a preinstalled AEM Service Pack 6.5.16 and the same run mode is 606. For that reason, before starting the build, specify in the initialization scripts, i.e. in `src/2_author/installer.sh` and `src/3_publish/installer.sh`, the amount of expected bundles.
 
-. Go to `src` directory in this repository. Inside that directory, run the build defined in the `docker-compose-build.yml` file. As a result, five images will be built: `aem-base`, `aem-author`, `aem-publish`, `dispatcher` and `varnish`. For fully fledged AEM instances the build might take ~25 minutes in total, depending on hardware capabilities:
+. Go to `src` directory in this repository. Inside that directory, run the build defined in the `docker-compose-build.yml` file. As a result, six images will be built: `aem-base`, `aem-author`, `aem-publish`, `dispatcher-amd`, `dispatcher-arm` and `varnish`. For fully fledged AEM instances the build might take ~30 minutes in total, depending on hardware capabilities:
 +
 [source, bash]
 ----
@@ -89,19 +90,30 @@ docker compose --file docker-compose-build.yml build
 ----
 +
 [NOTE]
-In case of certain system setups, the command above should be hyphenated: `docker-compose`.
+====
+[upperroman]
+. In case of certain system setups, the command above should be hyphenated: `docker-compose`.
+. Add `--progress=plain` to the above command to see unfolded build output:
++
+[source, bash]
+----
+docker compose --file docker-compose-build.yml build --progress=plain
+----
 
-. Verify the build and make sure that all five _Dock AEM_ images are available on host:
+====
+
+. Verify the build and make sure that all six _Dock AEM_ images are available on host:
 +
 [source, bash]
 ----
 ❯ docker images
-REPOSITORY       TAG       IMAGE ID       CREATED          SIZE
-aem-base         latest    bfa5138f41f9   17 minutes ago   551MB
-aem-author       latest    a6e2a1121f1a   16 minutes ago   12.2GB
-aem-publish      latest    646c9030e37f   3 minutes ago    11.2GB
-dispatcher       latest    13f0b135a185   1 minute ago     288MB
-varnish          latest    f4888874c28a   1 minute ago     333MB
+REPOSITORY       TAG       IMAGE ID       CREATED           SIZE
+aem-base         latest    348a58fe2b13   27 minutes ago    917MB
+aem-author       latest    9f3e08be63c9   23 minutes ago    9.65GB
+aem-publish      latest    af9b7f0af3ef   16 minutes ago    9.64GB
+dispatcher-amd   latest    51a39bf9352b   12 minutes ago    317MB
+dispatcher-arm   latest    97624ffe9c32   14 minutes ago    317MB
+varnish          latest    0e6eccf59bc4   1 minute ago      309MB
 ----
 
 === Container Run, Start & Stop
@@ -117,8 +129,11 @@ docker compose --file docker-compose-author.yml up --detach
 # AEM Publish:
 docker compose --file docker-compose-publish.yml up --detach
 
-# AEM Dispatcher:
-docker compose --file docker-compose-dispatcher.yml up --detach
+# AEM Dispatcher - AMD:
+docker compose --file docker-compose-dispatcher-amd.yml up --detach
+
+# AEM Dispatcher - ARM:
+docker compose --file docker-compose-dispatcher-arm.yml up --detach
 
 # Varnish Cache:
 docker compose --file docker-compose-varnish.yml up --detach
@@ -139,9 +154,13 @@ docker stop aem-author
 docker start aem-publish
 docker stop aem-publish
 
-# AEM Dispatcher:
-docker start dispatcher
-docker stop dispatcher
+# AEM Dispatcher - AMD:
+docker start dispatcher-amd
+docker stop dispatcher-amd
+
+# AEM Dispatcher - ARM:
+docker start dispatcher-arm
+docker stop dispatcher-arm
 
 # Varnish Cache:
 docker start varnish
@@ -151,12 +170,15 @@ docker stop varnish
 === AEM Dispatcher & Varnish Cache Specifics
 [upperalpha]
 . AEM Dispatcher and Varnish Cache configuration files used during images build are the default ones, but adjusted as little as possible according to the official instructions. The original versions of the configuration files for the sake of comparison are kept in respective directories besides the changed ones.
-. In order to transfer files (first of all new configuration files) from the host into a container in which AEM Dispatcher or Varnish Cache are run, use commands constructed in the following way:
+. In order to transfer files (primarily new configuration files) from the host into a container in which AEM Dispatcher or Varnish Cache are run, use commands constructed in the following way:
 +
 [source, bash]
 ----
-# AEM Dispatcher:
-docker cp "$HOME/dispatcher.any" dispatcher:/etc/apache2/conf/dispatcher.any
+# AEM Dispatcher - AMD:
+docker cp "$HOME/dispatcher.any" dispatcher-amd:/etc/apache2/conf/dispatcher.any
+
+# AEM Dispatcher - ARM:
+docker cp "$HOME/dispatcher.any" dispatcher-arm:/etc/apache2/conf/dispatcher.any
 
 # Varnish Cache:
 docker cp "$HOME/default.vcl" varnish:/etc/varnish/default.vcl
@@ -166,8 +188,11 @@ docker cp "$HOME/default.vcl" varnish:/etc/varnish/default.vcl
 +
 [source, bash]
 ----
-# AEM Dispatcher:
-docker exec dispatcher /etc/init.d/apache2 reload
+# AEM Dispatcher - AMD:
+docker exec dispatcher-amd /etc/init.d/apache2 reload
+
+# AEM Dispatcher - ARM:
+docker exec dispatcher-arm /etc/init.d/apache2 reload
 
 # Varnish Cache:
 docker exec varnish varnishreload
@@ -231,7 +256,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/administering/secu
 
 . Set run modes:
 +
-`-Dsling.run.modes=author,samplecontent,local`
+`-Dsling.run.modes=author,nosamplecontent,local`
 +
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-65/deploying/configuring/configure-runmodes.html?lang=en
