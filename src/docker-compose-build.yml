@@ -24,15 +24,26 @@ services:
       - aem-base
       - aem-author
 
-  dispatcher:
+  dispatcher-amd:
     build:
       context: .
-      dockerfile: 4_dispatcher/Dockerfile
-    image: dispatcher:latest
+      dockerfile: 4_dispatcher/Dockerfile-AMD
+    image: dispatcher-amd:latest
     depends_on:
       - aem-base
       - aem-author
       - aem-publish
+
+  dispatcher-arm:
+    build:
+      context: .
+      dockerfile: 4_dispatcher/Dockerfile-ARM
+    image: dispatcher-arm:latest
+    depends_on:
+      - aem-base
+      - aem-author
+      - aem-publish
+      - dispatcher-amd
 
   varnish:
     build:
@@ -43,4 +54,5 @@ services:
       - aem-base
       - aem-author
       - aem-publish
-      - dispatcher
+      - dispatcher-amd
+      - dispatcher-arm

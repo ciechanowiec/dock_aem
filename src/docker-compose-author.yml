@@ -14,7 +14,7 @@ services:
                "-XX:+UseParallelGC", "--add-opens=java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED", "--add-opens=java.base/sun.net.www.protocol.jrt=ALL-UNNAMED", "--add-opens=java.naming/javax.naming.spi=ALL-UNNAMED", "--add-opens=java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED", "--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED", "--add-opens=java.base/java.net=ALL-UNNAMED", "-Dnashorn.args=--no-deprecation-warning",
                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8888",
                "-Dadmin.password.file=/opt/aem/author/passwordfile.properties",
-               "-Dsling.run.modes=author,samplecontent,local",
+               "-Dsling.run.modes=author,nosamplecontent,local",
                "-jar", "/opt/aem/author/aem-quickstart-6.5.0.jar",
                "-nointeractive",
                "-port", "4502",
