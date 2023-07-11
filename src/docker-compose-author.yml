@@ -20,15 +20,15 @@ services:
                "-port", "4502",
                "-nofork",
                "-nobrowser" ]
-    #   AEM is started for the first time during the image build, hence passing
-    #   the password file during container startup is idle. However, the following
-    #   secrets section is retained in case the image build definition changes:
-    #    secrets:
-    #      - source: admin-password
-    #        target: /opt/aem/author/passwordfile.properties
-    #        mode: 0444
+#   AEM is started for the first time during the image build, hence passing
+#   the password file during container startup is idle. However, the following
+#   secrets section is retained in case the image build definition changes:
+#    secrets:
+#      - source: admin-password
+#        target: /opt/aem/author/passwordfile.properties
+#        mode: 0444
     network_mode: "host"
-    #   In case of `network_mode` set to `host` ports publishing should be disabled:
+#   In case of `network_mode` set to `host` ports publishing should be disabled:
 #    ports:
 #      - target: 4502
 #        published: 4502

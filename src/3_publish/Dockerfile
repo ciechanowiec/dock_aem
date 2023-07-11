@@ -2,8 +2,9 @@ FROM aem-base:latest
 
 WORKDIR /opt/aem/publish
 
-COPY ../resources/aem-quickstart-6.5.0.jar .
-COPY ../resources/license.properties .
+COPY ../quickstart/aem-quickstart-6.5.0.jar .
+COPY ../quickstart/license.properties .
+COPY ../crypto/data ./data
 COPY ../3_publish/passwordfile.properties .
 COPY ../3_publish/installer.sh .
 

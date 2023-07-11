@@ -61,22 +61,26 @@ docker volume remove --force aem-author-data aem-publish-data
 docker network remove --force aem
 ----
 
-. `src/resources`
+. `src/quickstart`
 +
-Put two following files into `src/resources` directory in this repository (files inside `src/resources` are git-ignored, so there is no risk of exposing them in the source control):
+Put two following files into `src/quickstart` directory in this repository (files inside `src/quickstart` are git-ignored, so there is no risk of exposing them in the source control):
 [upperroman]
 .. `aem-quickstart-6.5.0.jar`
 .. `license.properties`
 
 . `src/packages`
 +
-If there are any Apache Jackrabbit FileVault packages that should be preinstalled on AEM Author and AEM Publish, put them into `src/packages` directory in this repository (files inside `src/packages`, just like files inside `src/resources`, are git-ignored, so there is no risk of exposing them in the source control). For instance, those packages could be the following ones:
+If there are any Apache Jackrabbit FileVault packages that should be preinstalled on AEM Author and AEM Publish, put them into `src/packages` directory in this repository (files inside `src/packages`, just like files inside `src/quickstart`, are git-ignored, so there is no risk of exposing them in the source control). For instance, those packages could be the following ones:
 [upperroman]
 .. `aem-service-pkg-6.5.16-NPR-40551-B002.zip` (AEM Service Pack 6.5.16)
 .. `adobe-aemfd-linux-pkg-6.0.914.zip` (AEM Forms Addon related to AEM 6.5.16)
 .. `content.zip` (preinstalled content)
 
-. During the images build, AEM Author and AEM Publish instances are started. This is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_author/installer.sh` and `src/3_publish/installer.sh` scripts respectively. Those scripts also shutdown the instances once the initialization is finished.
+. `src/crypto`
++
+A `src/crypto` directory contains a `data` directory with default `hmac` and `master` keys. Those keys are used by `com.adobe.granite.crypto.file` bundle for secrets encoding and default versions of the keys are provided for deterministic and predictable behavior. If it is necessary to use different keys, replace the existing ones with the new ones. However, note that those keys aren't git-ignored, so be careful and don't git commit sensitive secrets.
+
+. During the images build, AEM Author and AEM Publish instances are started. Among others, this is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_author/installer.sh` and `src/3_publish/installer.sh` scripts respectively. Those scripts also shutdown the instances once the initialization is finished.
 +
 The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages` and on `samplecontent`/`nosamplecontent` run mode choice. For instance, for a clean AEM 6.5.0 instance without any preinstalled packages and a `samplecontent` run mode, the expected amount of bundles is 577, while the amount of bundles for an AEM 6.5.0 instance with a preinstalled AEM Service Pack 6.5.16 and the same run mode is 606. For that reason, before starting the build, specify in the initialization scripts, i.e. in `src/2_author/installer.sh` and `src/3_publish/installer.sh`, the amount of expected bundles.
 

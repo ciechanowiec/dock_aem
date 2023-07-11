@@ -8,8 +8,8 @@ log
 .vscode
 target
 # Don't keep proprietary files in git:
-/src/resources/*
-!src/resources/.gitkeep
+/src/quickstart/*
+!src/quickstart/.gitkeep
 /src/packages/*
 !src/packages/.gitkeep
 # Compiled documentation:
