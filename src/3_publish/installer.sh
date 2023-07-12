@@ -2,6 +2,7 @@
 
 echo "Setting up the script variables..."
 aemDir="/opt/aem/publish"
+slingPropsFile="$aemDir/crx-quickstart/conf/sling.properties"
 runModes="publish,nosamplecontent,local"
 aemPort="4503"
 debugPort="8889"
@@ -27,8 +28,15 @@ updateSlingPropsForForms () {
   # The following adjustments are required for AEM Forms addon work correctly.
   # Although the documentation requires it only for Windows, but for UNIX that is also the case
   # (https://experienceleague.adobe.com/docs/experience-manager-learn/forms/adaptive-forms/installing-aem-form-on-windows-tutorial-use.html?lang=en):
-  echo "sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*" >> "$aemDir/crx-quickstart/conf/sling.properties"
-  echo "sling.bootdelegation.class.org.bouncycastle.jce.provider.BouncyCastleProvider=org.bouncycastle.*" >> "$aemDir/crx-quickstart/conf/sling.properties"
+  echo "sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*" >> "$slingPropsFile"
+  echo "sling.bootdelegation.class.org.bouncycastle.jce.provider.BouncyCastleProvider=org.bouncycastle.*" >> "$slingPropsFile"
+}
+
+updateSlingPropsForSQL () {
+  echo ""
+  echo "Updating Sling properties related to SQL..."
+  # We need it to have SQL on the class path:
+  sed -i 's/org.osgi.framework.system.packages.extra=/&java.sql,/' "$slingPropsFile"
 }
 
 startAEMInBackground () {
@@ -62,7 +70,7 @@ waitUntilBundlesStatusMatch () {
     date
     echo ""
     echo "Latest logs:"
-    tail -n 100 "$aemDir/crx-quickstart/logs/error.log"
+    tail -n 50 "$aemDir/crx-quickstart/logs/error.log"
     echo "Actual bundles status: $actualBundlesStatus"
     echo "Expected bundles status: $expectedBundlesStatus"
     if [[ "$actualBundlesStatus" =~ .*"$expectedBundlesStatus".* ]]
@@ -133,3 +141,4 @@ sleep 60
 killAEM
 
 setupCryptoKeys
+updateSlingPropsForSQL
