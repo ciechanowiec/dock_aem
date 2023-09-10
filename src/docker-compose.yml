@@ -1,0 +1,168 @@
+version: "3.9"
+
+services:
+  aem-base:
+    build:
+      context: .
+      dockerfile: 1_base/Dockerfile
+    image: aem-base:latest
+
+  aem-author-65:
+    build:
+      context: .
+      dockerfile: 2_aem/Dockerfile
+      args:
+        AEM_DIR: /opt/aem/author
+        AEM_TYPE: 65
+        RUN_MODES: author,nosamplecontent,local
+        AEM_PORT: 4502
+        DEBUG_PORT: 8888
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 719
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 725
+    environment:
+      AEM_DIR: /opt/aem/author
+      AEM_TYPE: 65
+      RUN_MODES: author,nosamplecontent,local
+      AEM_PORT: 4502
+      DEBUG_PORT: 8888
+    image: aem-author-65:latest
+    container_name: aem-author-65
+    volumes:
+      - type: volume
+        source: aem-author-65-data
+        target: /opt/aem/author/crx-quickstart
+    entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  aem-author-cloud:
+    build:
+      context: .
+      dockerfile: 2_aem/Dockerfile
+      args:
+        AEM_DIR: /opt/aem/author
+        AEM_TYPE: cloud
+        RUN_MODES: author,nosamplecontent,local
+        AEM_PORT: 4502
+        DEBUG_PORT: 8888
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 676
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 676
+    environment:
+      AEM_DIR: /opt/aem/author
+      AEM_TYPE: cloud
+      RUN_MODES: author,nosamplecontent,local
+      AEM_PORT: 4502
+      DEBUG_PORT: 8888
+    image: aem-author-cloud:latest
+    container_name: aem-author-cloud
+    volumes:
+      - type: volume
+        source: aem-author-cloud-data
+        target: /opt/aem/author/crx-quickstart
+    entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  aem-publish-65:
+    build:
+      context: .
+      dockerfile: 2_aem/Dockerfile
+      args:
+        AEM_DIR: /opt/aem/publish
+        AEM_TYPE: 65
+        RUN_MODES: publish,nosamplecontent,local
+        AEM_PORT: 4503
+        DEBUG_PORT: 8889
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 719
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 725
+    environment:
+      AEM_DIR: /opt/aem/publish
+      AEM_TYPE: 65
+      RUN_MODES: publish,nosamplecontent,local
+      AEM_PORT: 4503
+      DEBUG_PORT: 8889
+    image: aem-publish-65:latest
+    container_name: aem-publish-65
+    volumes:
+      - type: volume
+        source: aem-publish-65-data
+        target: /opt/aem/publish/crx-quickstart
+    entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  aem-publish-cloud:
+    build:
+      context: .
+      dockerfile: 2_aem/Dockerfile
+      args:
+        AEM_DIR: /opt/aem/publish
+        AEM_TYPE: cloud
+        RUN_MODES: publish,nosamplecontent,local
+        AEM_PORT: 4503
+        DEBUG_PORT: 8889
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 670
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 670
+    environment:
+      AEM_DIR: /opt/aem/publish
+      AEM_TYPE: cloud
+      RUN_MODES: publish,nosamplecontent,local
+      AEM_PORT: 4503
+      DEBUG_PORT: 8889
+    image: aem-publish-cloud:latest
+    container_name: aem-publish-cloud
+    volumes:
+      - type: volume
+        source: aem-publish-cloud-data
+        target: /opt/aem/publish/crx-quickstart
+    entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  dispatcher-amd:
+    build:
+      context: .
+      dockerfile: 3_dispatcher/Dockerfile
+      args:
+        CPU_ARCH: x86_64
+    image: dispatcher-amd:latest
+    container_name: dispatcher-amd
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  dispatcher-arm:
+    build:
+      context: .
+      dockerfile: 3_dispatcher/Dockerfile
+      args:
+        CPU_ARCH: aarch64
+    image: dispatcher-arm:latest
+    container_name: dispatcher-arm
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+  varnish:
+    build:
+      context: .
+      dockerfile: 4_varnish/Dockerfile
+    image: varnish:latest
+    container_name: varnish
+    network_mode: "host"
+    depends_on:
+      - aem-base
+
+volumes:
+  aem-author-65-data:
+    name: "aem-author-65-data"
+  aem-author-cloud-data:
+    name: "aem-author-cloud-data"
+  aem-publish-65-data:
+    name: "aem-publish-65-data"
+  aem-publish-cloud-data:
+    name: "aem-publish-cloud-data"

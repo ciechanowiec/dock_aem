@@ -20,77 +20,124 @@
 
 == Overview
 
-_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager 6.5 development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish and AEM Dispatcher/Varnish Cache instances. Remarkably, with _Dock AEM_ the time required for the first start of a fully fledged AEM instance is reduced by ~90% comparing to a classical startup (~12 min -> ~1 min 15 sec, depending on the machine).
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, and AEM Dispatcher/Varnish Cache instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
 
 == Usage
-=== Images Build
-==== Dockerfiles
-_Dock AEM_ delivers six `Dockerfile`++s++ that build the following generic images:
+_Dock AEM_ provides a `docker-compose.yml` file and related artifacts, enabling developers to:
 [upperalpha]
-. `src/1_base/Dockerfile` - builds Java 11 image, that is reused as the base for AEM Author and AEM Publish images
-. `src/2_author/Dockerfile` - builds AEM Author image
-. `src/3_publish/Dockerfile` - builds AEM Publish image
-. `src/4_dispatcher/Dockerfile-AMD` - builds AEM Dispatcher image for AMD CPU architecture
-. `src/4_dispatcher/Dockerfile-ARM` - builds AEM Dispatcher image for ARM CPU architecture
-. `src/5_varnish/Dockerfile` - builds Varnish Cache image
+. build various AEM images
+. run, start, and stop AEM containers
 
-The above `Dockerfile`++s++ can be used separately in order to subsequently build all six images. However, this might be cumbersome. Therefore, there is a `src/docker-compose-build.yml` file that provides possibility to build all six images at once.
+Supported images include:
+[upperalpha]
+. AEM Author 6.5
+. AEM Author as a Cloud Service
+. AEM Publish 6.5
+. AEM Publish as a Cloud Service
+. AEM Dispatcher for AMD CPU architecture
+. AEM Dispatcher for ARM CPU architecture
+. Varnish Cache
+
+=== Images Build
 
 ==== Steps
-In order to build _Dock AEM_ images follow the steps below.
+In order to build the _Dock AEM_ images follow the steps below.
+
 [upperalpha]
-. Clone this repository:
+. Clone the _Dock AEM_ source code repository:
 +
 [source, bash]
 ----
 git clone https://github.com/ciechanowiec/dock_aem
 ----
 
-. Remove all old _Dock AEM_ containers, images, volumes and networks:
+. Remove all preceding _Dock AEM_ containers, images and volumes:
 +
 [source, bash]
 ----
-docker container stop --time 30 aem-author aem-publish dispatcher-amd dispatcher-arm varnish
+artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish"
 
-docker container remove --force aem-author aem-publish dispatcher-amd dispatcher-arm varnish
+docker container stop --time 30 "$artifactsToRemove"
 
-docker image remove --force aem-base aem-author aem-publish dispatcher-amd dispatcher-arm varnish
+docker container remove --force "$artifactsToRemove"
 
-docker volume remove --force aem-author-data aem-publish-data
+docker image remove --force "$artifactsToRemove"
 
-docker network remove --force aem
+docker volume remove --force aem-author-65-data aem-author-cloud-data aem-publish-65-data aem-publish-cloud-data
 ----
+
+. `license.properties`
++
+Put a `license.properties` file into `src/commons` directory. It will be used during the build for both AEM 6.5 and AEMaaCS.
 
 . `src/quickstart`
 +
-Put two following files into `src/quickstart` directory in this repository (files inside `src/quickstart` are git-ignored, so there is no risk of exposing them in the source control):
-[upperroman]
-.. `aem-quickstart-6.5.0.jar`
-.. `license.properties`
+Put respective AEM QuickStart Jars into `src/quickstart/65` (AEM 6.5) and `src/quickstart/cloud` (AEMaaCS) directories in the _Dock AEM_ source code repository (files inside those directories are git-ignored, so there is no relevant risk of exposing them in the source control). Give both those Jars the following name: `aem-quickstart.jar`.
 
 . `src/packages`
 +
-If there are any Apache Jackrabbit FileVault packages that should be preinstalled on AEM Author and AEM Publish, put them into `src/packages` directory in this repository (files inside `src/packages`, just like files inside `src/quickstart`, are git-ignored, so there is no risk of exposing them in the source control). For instance, those packages could be the following ones:
+If there are any packages that should be preinstalled on AEM Author and AEM Publish, put them respectively into `src/packages/65` (AEM 6.5) or `src/packages/cloud` (AEMaaCS) directories in the _Dock AEM_ source code repository (files inside those directories, just like the files inside `src/quickstart` subdirectories, are git-ignored, so there is no relevant risk of exposing them in the source control).
++
+For instance, into `src/packages/65` the following packages can be put:
 [upperroman]
 .. `aem-service-pkg-6.5.16-NPR-40551-B002.zip` (AEM Service Pack 6.5.16)
 .. `adobe-aemfd-linux-pkg-6.0.914.zip` (AEM Forms Addon related to AEM 6.5.16)
 .. `content.zip` (preinstalled content)
 
-. `src/crypto`
 +
-A `src/crypto` directory contains a `data` directory with default `hmac` and `master` keys. Those keys are used by `com.adobe.granite.crypto.file` bundle for secrets encoding and default versions of the keys are provided for deterministic and predictable behavior. If it is necessary to use different keys, replace the existing ones with the new ones. However, note that those keys aren't git-ignored, so be careful and don't git commit sensitive secrets.
 
-. During the images build, AEM Author and AEM Publish instances are started. Among others, this is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_author/installer.sh` and `src/3_publish/installer.sh` scripts respectively. Those scripts also shutdown the instances once the initialization is finished.
+The `src/packages/cloud` directory, in turn, can be populated with the following packages:
+[upperroman]
+.. `aem-forms-addon-2023.08.03.00-230800.far` (AEM Forms Addon related to AEMaaCS)
+.. `content.zip` (preinstalled content)
+
+. `src/commons/crypto`
 +
-The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages` and on `samplecontent`/`nosamplecontent` run mode choice. For instance, for a clean AEM 6.5.0 instance without any preinstalled packages and a `samplecontent` run mode, the expected amount of bundles is 577, while the amount of bundles for an AEM 6.5.0 instance with a preinstalled AEM Service Pack 6.5.16 and the same run mode is 606. For that reason, before starting the build, specify in the initialization scripts, i.e. in `src/2_author/installer.sh` and `src/3_publish/installer.sh`, the amount of expected bundles.
+An `src/commons/crypto` directory contains a `data` directory with default `hmac` and `master` keys. Those keys are used by `com.adobe.granite.crypto.file` bundle for secrets encoding and default versions of the keys are provided for deterministic and predictable behavior. If it is necessary to use different keys, replace the existing ones with the new ones. However, note that those keys aren't git-ignored, so be careful and don't git commit sensitive secrets.
 
-. Go to `src` directory in this repository. Inside that directory, run the build defined in the `docker-compose-build.yml` file. As a result, six images will be built: `aem-base`, `aem-author`, `aem-publish`, `dispatcher-amd`, `dispatcher-arm` and `varnish`. For fully fledged AEM instances the build might take ~30 minutes in total, depending on hardware capabilities:
+. During the images build, AEM Author and AEM Publish instances are started. Among others, this is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_aem/aem-starter.sh` script. That script also shutdowns the instances once the initialization is finished.
++
+The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages`, on run mode choice (`author`/`publish`, `samplecontent`/`nosamplecontent`) and the subsequent number of an instance start.
++
+
+.Expected bundles status for selected AEM setups
+[cols="4,2,2"]
+|===
+| |First Start |Second and Subsequent Starts
+| _AEM 6.5_ +
+- author/publish +
+- nosamplecontent +
+- aem-service-pkg-6.5.16-NPR-40551-B002.zip +
+- adobe-aemfd-linux-pkg-6.0.914.zip
+|719
+|725
+
+| _AEMaaCS_ +
+- author +
+- nosamplecontent +
+- aem-sdk-quickstart-2023.8.13206.20230821T124823Z-230800.jar +
+- aem-forms-addon-2023.08.03.00-230800.far
+|676
+|676
+
+| _AEMaaCS_ +
+- publish +
+- nosamplecontent +
+- aem-sdk-quickstart-2023.8.13206.20230821T124823Z-230800.jar +
+- aem-forms-addon-2023.08.03.00-230800.far
+|670
+|670
+|===
++
+Due to the bundles readiness check described above, the exact expected amount of active bundles for the specified AEM setups must be configured in the `docker-compose.yml` file.
+
+. Go to `src` directory in the _Dock AEM_ source code repository. Inside that directory, run the build defined in the `docker-compose.yml` file. As a result, eight images will be built: `aem-base`, `aem-author-65`, `aem-author-cloud`, `aem-publish-65`, `aem-publish-cloud`, `dispatcher-amd`, `dispatcher-arm` and `varnish`. For fully fledged AEM instances the build might take ~45 minutes in total, depending on hardware capabilities:
 +
 [source, bash]
 ----
-cd "$pathToRepository/src"
+cd "$pathToDockAEMSourceCodeRepository/src"
 
-docker compose --file docker-compose-build.yml build
+docker compose build
 ----
 +
 [NOTE]
@@ -101,46 +148,59 @@ docker compose --file docker-compose-build.yml build
 +
 [source, bash]
 ----
-docker compose --file docker-compose-build.yml build --progress=plain
+docker compose --progress=plain build
 ----
-
+. It is possible to build independently only some specific image defined the `docker-compose.yml` file by providing that image name to the build command in the following way:
++
+[source, bash]
+----
+docker compose build aem-author-cloud
+----
 ====
 
-. Verify the build and make sure that all six _Dock AEM_ images are available on host:
+. Verify the build and make sure that all eight _Dock AEM_ images are available on host:
 +
 [source, bash]
 ----
 ❯ docker images
-REPOSITORY       TAG       IMAGE ID       CREATED           SIZE
-aem-base         latest    348a58fe2b13   27 minutes ago    917MB
-aem-author       latest    9f3e08be63c9   23 minutes ago    9.65GB
-aem-publish      latest    af9b7f0af3ef   16 minutes ago    9.64GB
-dispatcher-amd   latest    51a39bf9352b   12 minutes ago    317MB
-dispatcher-arm   latest    97624ffe9c32   14 minutes ago    317MB
-varnish          latest    0e6eccf59bc4   1 minute ago      309MB
+REPOSITORY          TAG       IMAGE ID       CREATED      SIZE
+aem-base            latest    ebf85dfbc09a   1 hour ago   867MB
+aem-author-65       latest    10e7e329a513   1 hour ago   9.66GB
+aem-author-cloud    latest    69180e29fbaf   1 hour ago   3.81GB
+aem-publish-65      latest    0de503a9527c   1 hour ago   9.59GB
+aem-publish-cloud   latest    b363142f9fde   1 hour ago   3.71GB
+dispatcher-amd      latest    1d3fe5004212   1 hour ago   332MB
+dispatcher-arm      latest    67f57547c3fa   1 hour ago   332MB
+varnish             latest    c09dd5353890   1 hour ago   298MB
 ----
 
 === Container Run, Start & Stop
 [upperalpha]
-. All containers based on _Dock AEM_ images can be run, started and stopped independently.
-. In order to run a given container for the first time, use Docker Compose files located inside `src` directory in this repository:
+. All containers based on the _Dock AEM_ images can be run, started and stopped independently.
+. In order to run a given container for the first time, use the `docker-compose.yml` file located inside `src` directory in the _Dock AEM_ source code repository:
 +
 [source, bash]
 ----
-# AEM Author:
-docker compose --file docker-compose-author.yml up --detach
+# AEM Author 6.5:
+docker compose up aem-author-65 --detach
 
-# AEM Publish:
-docker compose --file docker-compose-publish.yml up --detach
+# AEM Author Cloud:
+docker compose up aem-author-cloud --detach
 
-# AEM Dispatcher - AMD:
-docker compose --file docker-compose-dispatcher-amd.yml up --detach
+# AEM Publish 6.5:
+docker compose up aem-publish-65 --detach
 
-# AEM Dispatcher - ARM:
-docker compose --file docker-compose-dispatcher-arm.yml up --detach
+# AEM Publish Cloud:
+docker compose up aem-publish-cloud --detach
+
+# AEM Dispatcher AMD:
+docker compose up dispatcher-amd --detach
+
+# AEM Dispatcher ARM:
+docker compose up dispatcher-arm --detach
 
 # Varnish Cache:
-docker compose --file docker-compose-varnish.yml up --detach
+docker compose up varnish --detach
 ----
 +
 [NOTE]
@@ -150,19 +210,27 @@ In case of certain system setups, the command above should be hyphenated: `docke
 +
 [source, bash]
 ----
-# AEM Author:
-docker start aem-author
-docker stop aem-author
+# AEM Author 6.5:
+docker start aem-author-65
+docker stop aem-author-65
 
-# AEM Publish:
-docker start aem-publish
-docker stop aem-publish
+# AEM Author as a Cloud Service:
+docker start aem-author-cloud
+docker stop aem-author-cloud
 
-# AEM Dispatcher - AMD:
+# AEM Publish 6.5:
+docker start aem-publish-65
+docker stop aem-publish-65
+
+# AEM Publish as a Cloud Service:
+docker start aem-publish-cloud
+docker stop aem-publish-cloud
+
+# AEM Dispatcher for AMD CPU architecture:
 docker start dispatcher-amd
 docker stop dispatcher-amd
 
-# AEM Dispatcher - ARM:
+# AEM Dispatcher for ARM CPU architecture:
 docker start dispatcher-arm
 docker stop dispatcher-arm
 
@@ -204,20 +272,26 @@ docker exec varnish varnishreload
 
 === Mobile Volumes
 [upperalpha]
-. Persistence layers of AEM Author and AEM Publish instances are linked to `/opt/aem/author/crx-quickstart` and `/opt/aem/publish/crx-quickstart` paths inside respective containers. Those paths are mount points for `aem-author-data` and `aem-publish-data` volumes stored on a host at `/var/lib/docker/volumes` and managed by Docker. It means that persistence layers of AEM Author and AEM Publish instances are separated from the application.
+. Persistence layers of AEM Author and AEM Publish instances are linked to `/opt/aem/author/crx-quickstart` and `/opt/aem/publish/crx-quickstart` paths inside respective containers. Those paths are mount points for `aem-author-data-65`, `aem-author-data-cloud`, `aem-publish-data-65` and `aem-publish-data-cloud` volumes respectively, physically stored on a host at `/var/lib/docker/volumes` and managed by Docker. It means that persistence layers of AEM Author and AEM Publish instances are separated from the application.
 
-. If `aem-author-data` or `aem-publish-data` volume doesn't exist when a container with AEM Author or AEM Publish respectively is run for the first time, then a respective volume will be created and mounted to the container. However, if a respective volume does already exist, then no new volume will be created and the existing one will be reused, so that even to a new container the old volume with old persistence layer will be mounted. In order to avoid such reuse, before a new container is run for the first time, the respective volume should be priorly removed:
+. If `aem-author-data-65`, `aem-author-data-cloud`, `aem-publish-data-65` or `aem-publish-data-cloud` volume doesn't exist when a container with AEM Author or AEM Publish respectively is run for the first time, then a respective volume will be created and mounted to the container. However, if a respective volume does already exist, then no new volume will be created and the existing one will be reused, so that even to a new container the old volume with old persistence layer will be mounted. In order to avoid such reuse, before a new container is run for the first time, the respective volume should be priorly removed:
 +
 [source, bash]
 ----
-# AEM Author:
-docker volume remove --force aem-author-data
+# AEM Author 6.5:
+docker volume remove --force aem-author-data-65
 
-# AEM Publish:
-docker volume remove --force aem-publish-data
+# AEM Author as a Cloud Service:
+docker volume remove --force aem-author-data-cloud
+
+# AEM Publish 6.5:
+docker volume remove --force aem-publish-data-65
+
+# AEM Publish as a Cloud Service:
+docker volume remove --force aem-publish-data-cloud
 ----
 
-. The described volumes mechanism make AEM Author and AEM Publish persistence layers mobile, transferable and backupable. That mechanism can be rolled out to remote environments in order to make those environments fully reproducible locally.
+. The described volumes mechanism makes AEM Author and AEM Publish persistence layers mobile, transferable and backupable. That mechanism can be rolled out to remote environments in order to make those environments fully reproducible locally.
 
 == Start Command Decomposition
 This section explains every part of commands used to start AEM instances. The explanation employs an example based on the command for the AEM Author, but nevertheless for AEM Publish the command is analogous.
@@ -229,6 +303,15 @@ This section explains every part of commands used to start AEM instances. The ex
 +
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deploying/deploy.html?lang=en (`-Xmx1024M` is given as recommended, but it is too little for parallel garbage collection)
+
+. Fix Java 11 bug related to ZIP validation:
++
+`-Djdk.util.zip.disableZip64ExtraFieldValidation=true`
++
+_Docs:_ +
+[upperroman]
+.. https://experienceleaguecommunities.adobe.com/t5/adobe-experience-manager/aem-local-server-error-while-starting/m-p/613644/highlight/true#M153985
+.. https://liferay.atlassian.net/browse/LPS-191551
 
 . Run AEM in a headless mode because it is run inside a Docker container:
 +

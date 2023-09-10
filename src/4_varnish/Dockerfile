@@ -12,4 +12,4 @@ RUN apt install less -y && \
     apt install tree -y && \
     apt install wget -y
 
-COPY ../5_varnish/default.vcl /etc/varnish
+COPY ../4_varnish/default.vcl /etc/varnish
