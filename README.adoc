@@ -150,7 +150,7 @@ docker compose build
 ----
 docker compose --progress=plain build
 ----
-. It is possible to build independently only some specific image defined the `docker-compose.yml` file by providing that image name to the build command in the following way:
+. It is possible to build independently only some specific image defined in the `docker-compose.yml` file by providing that image name to the build command in the following way:
 +
 [source, bash]
 ----
