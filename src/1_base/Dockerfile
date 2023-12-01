@@ -6,6 +6,7 @@ RUN apt install less -y && \
     apt install htop -y && \
     apt install lsof -y && \
     apt install psmisc -y && \
+    apt install bc -y && \
     apt install jq -y && \
     apt install vim -y && \
     apt install tree -y && \
