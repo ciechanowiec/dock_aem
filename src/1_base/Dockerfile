@@ -4,6 +4,7 @@ RUN apt update
 RUN apt install less -y && \
     apt install curl -y && \
     apt install htop -y && \
+    apt install lsof -y && \
     apt install psmisc -y && \
     apt install jq -y && \
     apt install vim -y && \
