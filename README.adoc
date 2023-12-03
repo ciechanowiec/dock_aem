@@ -335,7 +335,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deployin
 
 . Run AEM in debug mode on the given port, additionally to the basic port:
 +
-`-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8888`
+`-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8888`
 +
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-learn/cloud-service/debugging/debugging-aem-sdk/remote-debugging.html?lang=en
