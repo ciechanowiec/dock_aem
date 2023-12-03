@@ -1,15 +1,13 @@
 FROM varnish:latest
 
+ARG AEM_PUBLISH_HOSTNAME
+
 USER root
 
-RUN apt update
-RUN apt install less -y && \
-    apt install curl -y && \
-    apt install htop -y && \
-    apt install psmisc -y && \
-    apt install jq -y && \
-    apt install vim -y && \
-    apt install tree -y && \
-    apt install wget -y
+COPY ../commons/apt-installer.sh .
+RUN ./apt-installer.sh
+RUN rm apt-installer.sh
 
 COPY ../4_varnish/default.vcl /etc/varnish
+
+RUN sed -i "s/localhost/"${AEM_PUBLISH_HOSTNAME}"/g" /etc/varnish/default.vcl

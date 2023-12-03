@@ -1,17 +1,26 @@
 version: "3.9"
 
+x-custom-variables:
+  &global-variables
+  AEM_PUBLISH_HOSTNAME: aem-publish
+  DISPATCHER_HOSTNAME: dispatcher
+
 services:
   aem-base:
     build:
       context: .
       dockerfile: 1_base/Dockerfile
     image: aem-base:latest
+    hostname: aem-base
+    networks:
+      - aem-network
 
   aem-author-65:
     build:
       context: .
       dockerfile: 2_aem/Dockerfile
       args:
+        <<: *global-variables
         AEM_DIR: /opt/aem/author
         AEM_TYPE: 65
         RUN_MODES: author,nosamplecontent,local
@@ -32,7 +41,18 @@ services:
         source: aem-author-65-data
         target: /opt/aem/author/crx-quickstart
     entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
-    network_mode: "host"
+    hostname: aem-author
+    networks:
+      - aem-network
+    ports:
+      - target: 4502
+        published: 4502
+        protocol: tcp
+        mode: host
+      - target: 8888
+        published: 8888
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -41,13 +61,14 @@ services:
       context: .
       dockerfile: 2_aem/Dockerfile
       args:
+        <<: *global-variables
         AEM_DIR: /opt/aem/author
         AEM_TYPE: cloud
         RUN_MODES: author,nosamplecontent,local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 676
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 676
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 683
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 683
     environment:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: cloud
@@ -61,7 +82,18 @@ services:
         source: aem-author-cloud-data
         target: /opt/aem/author/crx-quickstart
     entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
-    network_mode: "host"
+    hostname: aem-author
+    networks:
+      - aem-network
+    ports:
+      - target: 4502
+        published: 4502
+        protocol: tcp
+        mode: host
+      - target: 8888
+        published: 8888
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -70,6 +102,7 @@ services:
       context: .
       dockerfile: 2_aem/Dockerfile
       args:
+        <<: *global-variables
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: 65
         RUN_MODES: publish,nosamplecontent,local
@@ -90,7 +123,18 @@ services:
         source: aem-publish-65-data
         target: /opt/aem/publish/crx-quickstart
     entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
-    network_mode: "host"
+    hostname: aem-publish
+    networks:
+      - aem-network
+    ports:
+      - target: 4503
+        published: 4503
+        protocol: tcp
+        mode: host
+      - target: 8889
+        published: 8889
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -99,13 +143,14 @@ services:
       context: .
       dockerfile: 2_aem/Dockerfile
       args:
+        <<: *global-variables
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: cloud
         RUN_MODES: publish,nosamplecontent,local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 670
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 670
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 677
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 677
     environment:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: cloud
@@ -119,7 +164,18 @@ services:
         source: aem-publish-cloud-data
         target: /opt/aem/publish/crx-quickstart
     entrypoint: ["sh", "-c", "$$AEM_DIR/aem-starter.sh" ]
-    network_mode: "host"
+    hostname: aem-publish
+    networks:
+      - aem-network
+    ports:
+      - target: 4503
+        published: 4503
+        protocol: tcp
+        mode: host
+      - target: 8889
+        published: 8889
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -128,10 +184,18 @@ services:
       context: .
       dockerfile: 3_dispatcher/Dockerfile
       args:
+        <<: *global-variables
         CPU_ARCH: x86_64
     image: dispatcher-amd:latest
     container_name: dispatcher-amd
-    network_mode: "host"
+    hostname: dispatcher
+    networks:
+      - aem-network
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -140,10 +204,18 @@ services:
       context: .
       dockerfile: 3_dispatcher/Dockerfile
       args:
+        <<: *global-variables
         CPU_ARCH: aarch64
     image: dispatcher-arm:latest
     container_name: dispatcher-arm
-    network_mode: "host"
+    hostname: dispatcher
+    networks:
+      - aem-network
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -151,9 +223,40 @@ services:
     build:
       context: .
       dockerfile: 4_varnish/Dockerfile
+      args:
+        <<: *global-variables
     image: varnish:latest
     container_name: varnish
-    network_mode: "host"
+    hostname: varnish
+    networks:
+      - aem-network
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+    depends_on:
+      - aem-base
+
+  solr:
+    build:
+      context: .
+      dockerfile: 5_solr/Dockerfile
+      args:
+        SOLR_DIR: /opt/solr
+    environment:
+      SOLR_DIR: /opt/solr
+    image: solr:latest
+    container_name: solr
+    entrypoint: ["sh", "-c", "$$SOLR_DIR/solr-starter.sh" ]
+    hostname: solr
+    networks:
+      - aem-network
+    ports:
+      - target: 8983
+        published: 8983
+        protocol: tcp
+        mode: host
     depends_on:
       - aem-base
 
@@ -166,3 +269,7 @@ volumes:
     name: "aem-publish-65-data"
   aem-publish-cloud-data:
     name: "aem-publish-cloud-data"
+
+networks:
+  aem-network:
+    driver: bridge

@@ -1,16 +1,11 @@
 FROM ubuntu/apache2:latest
 
 ARG CPU_ARCH
+ARG AEM_PUBLISH_HOSTNAME
 
-RUN apt update
-RUN apt install less -y && \
-    apt install curl -y && \
-    apt install htop -y && \
-    apt install psmisc -y && \
-    apt install jq -y && \
-    apt install vim -y && \
-    apt install tree -y && \
-    apt install wget -y
+COPY ../commons/apt-installer.sh .
+RUN ./apt-installer.sh
+RUN rm apt-installer.sh
 
 RUN mkdir -p /etc/apache2/conf
 RUN mkdir -p /etc/apache2/extra
@@ -30,5 +25,7 @@ RUN cp --verbose dispatcher-apache2.4-4.3.5.so /usr/lib/apache2/modules/mod_disp
 COPY ../3_dispatcher/apache2.conf /etc/apache2/apache2.conf
 COPY ../3_dispatcher/dispatcher.any /etc/apache2/conf/dispatcher.any
 COPY ../3_dispatcher/httpd-dispatcher.conf /etc/apache2/extra
+
+RUN sed -i "s/\/hostname \"127.0.0.1\"/\/hostname \"${AEM_PUBLISH_HOSTNAME}\"/g" /etc/apache2/conf/dispatcher.any
 
 WORKDIR /etc/apache2

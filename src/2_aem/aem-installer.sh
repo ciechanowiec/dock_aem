@@ -59,7 +59,7 @@ waitUntilBundlesStatusMatch () {
       then
         isInitializationFinalized=true
         echo "Number of bundles matched"
-        sleep 5
+        sleep 10
       else
         sleep 15
     fi
@@ -119,7 +119,7 @@ setPublishReplicationAgentPartOne () {
   curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
       -F "enabled=true" \
       -F "transportPassword=admin" \
-      -F "transportUri=http://localhost:4503/bin/receive?sling:authRequestLogin=1" \
+      -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
       -F "transportUser=admin" \
       "http://localhost:$AEM_PORT/etc/replication/agents.author/publish/jcr:content")
   echo "$curlOutput"
@@ -156,7 +156,7 @@ setDispatcherReplicationAgent () {
   echo ""
   echo "Setting up a dispatcher replication agent..."
   curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
-      -F "transportUri=http://localhost:80/dispatcher/invalidate.cache" \
+      -F "transportUri=http://$DISPATCHER_HOSTNAME:80/dispatcher/invalidate.cache" \
       -F "enabled=true" \
       "http://localhost:$AEM_PORT/etc/replication/agents.author/flush/jcr:content")
   echo "$curlOutput"

@@ -20,13 +20,13 @@
 
 == Overview
 
-_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, and AEM Dispatcher/Varnish Cache instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache and Apache Solr instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
 
 == Usage
 _Dock AEM_ provides a `docker-compose.yml` file and related artifacts, enabling developers to:
 [upperalpha]
-. build various AEM images
-. run, start, and stop AEM containers
+. build various AEM and AEM-related images
+. run, start, and stop AEM and AEM-related containers
 
 Supported images include:
 [upperalpha]
@@ -37,10 +37,10 @@ Supported images include:
 . AEM Dispatcher for AMD CPU architecture
 . AEM Dispatcher for ARM CPU architecture
 . Varnish Cache
+. Apache Solr
 
 === Images Build
 
-==== Steps
 In order to build the _Dock AEM_ images follow the steps below.
 
 [upperalpha]
@@ -55,7 +55,7 @@ git clone https://github.com/ciechanowiec/dock_aem
 +
 [source, bash]
 ----
-artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish"
+artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish solr"
 
 docker container stop --time 30 "$artifactsToRemove"
 
@@ -88,7 +88,7 @@ For instance, into `src/packages/65` the following packages can be put:
 
 The `src/packages/cloud` directory, in turn, can be populated with the following packages:
 [upperroman]
-.. `aem-forms-addon-2023.08.03.00-230800.far` (AEM Forms Addon related to AEMaaCS)
+.. `aem-forms-addon-2023.10.25.00-231100.far` (AEM Forms Addon related to AEMaaCS)
 .. `content.zip` (preinstalled content)
 
 . `src/commons/crypto`
@@ -115,23 +115,23 @@ The initialization is assumed to be finished when all required bundles have star
 | _AEMaaCS_ +
 - author +
 - nosamplecontent +
-- aem-sdk-quickstart-2023.8.13206.20230821T124823Z-230800.jar +
-- aem-forms-addon-2023.08.03.00-230800.far
-|676
-|676
+- aem-sdk-quickstart-2023.11.14227.20231108T162349Z-231100.jar +
+- aem-forms-addon-2023.10.25.00-231100.far
+|683
+|683
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
-- aem-sdk-quickstart-2023.8.13206.20230821T124823Z-230800.jar +
-- aem-forms-addon-2023.08.03.00-230800.far
-|670
-|670
+- aem-sdk-quickstart-2023.11.14227.20231108T162349Z-231100.jar +
+- aem-forms-addon-2023.10.25.00-231100.far
+|677
+|677
 |===
 +
 Due to the bundles readiness check described above, the exact expected amount of active bundles for the specified AEM setups must be configured in the `docker-compose.yml` file.
 
-. Go to `src` directory in the _Dock AEM_ source code repository. Inside that directory, run the build defined in the `docker-compose.yml` file. As a result, eight images will be built: `aem-base`, `aem-author-65`, `aem-author-cloud`, `aem-publish-65`, `aem-publish-cloud`, `dispatcher-amd`, `dispatcher-arm` and `varnish`. For fully fledged AEM instances the build might take ~45 minutes in total, depending on hardware capabilities:
+. Go to `src` directory in the _Dock AEM_ source code repository. Inside that directory, run the build defined in the `docker-compose.yml` file. As a result, eight images will be built: `aem-base`, `aem-author-65`, `aem-author-cloud`, `aem-publish-65`, `aem-publish-cloud`, `dispatcher-amd`, `dispatcher-arm`, `varnish` and `solr`. For fully fledged AEM instances the build might take ~40 minutes in total, depending on hardware capabilities:
 +
 [source, bash]
 ----
@@ -158,20 +158,21 @@ docker compose build aem-author-cloud
 ----
 ====
 
-. Verify the build and make sure that all eight _Dock AEM_ images are available on host:
+. Verify the build and make sure that all nine _Dock AEM_ images are available on host:
 +
 [source, bash]
 ----
 ❯ docker images
 REPOSITORY          TAG       IMAGE ID       CREATED      SIZE
-aem-base            latest    ebf85dfbc09a   1 hour ago   867MB
-aem-author-65       latest    10e7e329a513   1 hour ago   9.66GB
-aem-author-cloud    latest    69180e29fbaf   1 hour ago   3.81GB
-aem-publish-65      latest    0de503a9527c   1 hour ago   9.59GB
-aem-publish-cloud   latest    b363142f9fde   1 hour ago   3.71GB
-dispatcher-amd      latest    1d3fe5004212   1 hour ago   332MB
-dispatcher-arm      latest    67f57547c3fa   1 hour ago   332MB
-varnish             latest    c09dd5353890   1 hour ago   298MB
+aem-base            latest    bb188da069d9   1 hour ago   1.31GB
+aem-author-65       latest    fc205742190d   1 hour ago   10.1GB
+aem-author-cloud    latest    25eb57cdf070   1 hour ago   4.3GB
+aem-publish-65      latest    3a48c564925e   1 hour ago   10.1GB
+aem-publish-cloud   latest    aeb9052d3096   1 hour ago   4.2GB
+dispatcher-amd      latest    a6724be27ef7   1 hour ago   1.28GB
+dispatcher-arm      latest    ff8962803d23   1 hour ago   1.28GB
+varnish             latest    01f2cda11b61   1 hour ago   1.23GB
+solr                latest    e3d19f01025e   1 hour ago   1.63GB
 ----
 
 === Container Run, Start & Stop
@@ -201,6 +202,9 @@ docker compose up dispatcher-arm --detach
 
 # Varnish Cache:
 docker compose up varnish --detach
+
+# Apache Solr:
+docker compose up solr --detach
 ----
 +
 [NOTE]
@@ -237,10 +241,15 @@ docker stop dispatcher-arm
 # Varnish Cache:
 docker start varnish
 docker stop varnish
+
+# Apache Solr:
+docker start solr
+docker stop solr
 ----
 
 === AEM Dispatcher & Varnish Cache Specifics
 [upperalpha]
+. AEM Dispatcher and Varnish Cache containers might not run and start if no AEM Publish instance is active. The reason for such behavior is that AEM Dispatcher and Varnish Cache reference an AEM Publish domain name, hence when AEM Publish instance isn't available, the reference is void, which is not supported by AEM Dispatcher or Varnish Cache.
 . AEM Dispatcher and Varnish Cache configuration files used during images build are the default ones, but adjusted as little as possible according to the official instructions. The original versions of the configuration files for the sake of comparison are kept in respective directories besides the changed ones.
 . In order to transfer files (primarily new configuration files) from the host into a container in which AEM Dispatcher or Varnish Cache are run, use commands constructed in the following way:
 +
@@ -372,7 +381,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deployin
 == License
 The program is subject to MIT No Attribution License
 
-Copyright © 2023 Herman Ciechanowiec
+Copyright © 2023-2024 Herman Ciechanowiec
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
 
