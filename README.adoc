@@ -20,7 +20,7 @@
 
 == Overview
 
-_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache and Apache Solr instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache, Apache Solr and Apache ZooKeeper instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
 
 == Usage
 _Dock AEM_ provides a `docker-compose.yml` file and related artifacts, enabling developers to:
@@ -38,6 +38,7 @@ Supported images include:
 . AEM Dispatcher for ARM CPU architecture
 . Varnish Cache
 . Apache Solr
+. Apache ZooKeeper
 
 === Images Build
 
@@ -51,11 +52,11 @@ In order to build the _Dock AEM_ images follow the steps below.
 git clone https://github.com/ciechanowiec/dock_aem
 ----
 
-. Remove all preceding _Dock AEM_ containers, images and volumes:
+. Remove all preceding _Dock AEM_ containers, images, volumes and networks:
 +
 [source, bash]
 ----
-artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish solr"
+artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish solr zookeeper"
 
 docker container stop --time 30 "$artifactsToRemove"
 
@@ -64,6 +65,8 @@ docker container remove --force "$artifactsToRemove"
 docker image remove --force "$artifactsToRemove"
 
 docker volume remove --force aem-author-65-data aem-author-cloud-data aem-publish-65-data aem-publish-cloud-data
+
+docker network rm aem-network
 ----
 
 . `license.properties`
@@ -131,7 +134,7 @@ The initialization is assumed to be finished when all required bundles have star
 +
 Due to the bundles readiness check described above, the exact expected amount of active bundles for the specified AEM setups must be configured in the `docker-compose.yml` file.
 
-. Go to `src` directory in the _Dock AEM_ source code repository. Inside that directory, run the build defined in the `docker-compose.yml` file. As a result, eight images will be built: `aem-base`, `aem-author-65`, `aem-author-cloud`, `aem-publish-65`, `aem-publish-cloud`, `dispatcher-amd`, `dispatcher-arm`, `varnish` and `solr`. For fully fledged AEM instances the build might take ~40 minutes in total, depending on hardware capabilities:
+. Go to `src` directory in the _Dock AEM_ source code repository. Inside that directory, run the build defined in the `docker-compose.yml` file. As a result, eight images will be built: `aem-base`, `aem-author-65`, `aem-author-cloud`, `aem-publish-65`, `aem-publish-cloud`, `dispatcher-amd`, `dispatcher-arm`, `varnish`,  `solr` and `zookeeper`. For fully fledged AEM instances the build might take ~40 minutes in total, depending on hardware capabilities:
 +
 [source, bash]
 ----
@@ -173,6 +176,7 @@ dispatcher-amd      latest    a6724be27ef7   1 hour ago   1.28GB
 dispatcher-arm      latest    ff8962803d23   1 hour ago   1.28GB
 varnish             latest    01f2cda11b61   1 hour ago   1.23GB
 solr                latest    e3d19f01025e   1 hour ago   1.63GB
+zookeeper           latest    f8713ce13cc2   1 hour ago   1.39GB
 ----
 
 === Container Run, Start & Stop
@@ -204,6 +208,9 @@ docker compose up dispatcher-arm --detach
 docker compose up varnish --detach
 
 # Apache Solr:
+docker compose up solr --detach
+
+# Apache ZooKeeper:
 docker compose up solr --detach
 ----
 +
@@ -245,6 +252,10 @@ docker stop varnish
 # Apache Solr:
 docker start solr
 docker stop solr
+
+# Apache ZooKeeper:
+docker start zookeeper
+docker stop zookeeper
 ----
 
 === AEM Dispatcher & Varnish Cache Specifics
@@ -278,6 +289,9 @@ docker exec dispatcher-arm /etc/init.d/apache2 reload
 # Varnish Cache:
 docker exec varnish varnishreload
 ----
+
+=== Solr Configuration Sets Updates
+Apache Solr image embeds an `update-configset.sh` script that can be used to update configuration sets of the instance. Usage manual is provided in the script itself. There is also a `download-configsets.sh` script embedded for exporting existing configuration sets.
 
 === Mobile Volumes
 [upperalpha]
@@ -350,9 +364,9 @@ a `passwordfile.properties` file is assessed only during the first AEM start. If
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-65/administering/security/security-configure-admin-password.html?lang=en
 
-. Set run modes:
+. Set run modes. The hyphenated `author-local` run mode is required for cases where dot-driven run mode like `author.local` isn't supported:
 +
-`-Dsling.run.modes=author,nosamplecontent,local`
+`-Dsling.run.modes=author,nosamplecontent,local,author-local`
 +
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-65/deploying/configuring/configure-runmodes.html?lang=en

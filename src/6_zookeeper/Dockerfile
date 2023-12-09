@@ -1,20 +1,17 @@
 FROM aem-base:latest
 
-ARG SOLR_DIR
-ARG ZOOKEEPER_HOSTNAME
-ARG ZOOKEEPER_PORT
+ARG ZOOKEEPER_DIR
+ARG ZOOKEEPER_MY_ID
 
-WORKDIR ${SOLR_DIR}
+WORKDIR ${ZOOKEEPER_DIR}
 
 # The SSL adjustment required because of some curl issues related to GitHub API
 # (https://stackoverflow.com/questions/75763525/curl-35-error0a000152ssl-routinesunsafe-legacy-renegotiation-disabled):
 RUN echo "Options = UnsafeLegacyRenegotiation" >> /etc/ssl/openssl.cnf
 
-COPY ../5_solr/solr-installer.sh .
-COPY ../5_solr/solr-starter.sh .
+COPY ../6_zookeeper/zookeeper-installer.sh .
+COPY ../6_zookeeper/zookeeper-starter.sh .
 
-RUN ./solr-installer.sh
-RUN rm -v solr-installer.sh
+RUN ./zookeeper-installer.sh
 
-COPY ../5_solr/update-configset.sh $SOLR_DIR/bin/
-COPY ../5_solr/download-configsets.sh $SOLR_DIR/bin/
+RUN rm -v zookeeper-installer.sh

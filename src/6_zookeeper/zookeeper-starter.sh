@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "Starting Solr..."
+echo "Starting ZooKeeper..."
 
-"$SOLR_DIR/bin/solr" start -cloud -force
+"$ZOOKEEPER_DIR/bin/zkServer.sh" start
 
 # Required to keep the container running:
 tail -f /dev/null
