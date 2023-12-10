@@ -7,7 +7,7 @@ zooKeeperArchive="zk-$latestZooKeeperVersion.tar.gz"
 
 echo ""
 echo "Downloading the latest ZooKeeper binaries..."
-curl --insecure --location --output "$zooKeeperArchive" "https://dlcdn.apache.org/zookeeper/zookeeper-$latestZooKeeperVersion/apache-zookeeper-$latestZooKeeperVersion-bin.tar.gz"
+curl --insecure --location --output "$zooKeeperArchive" "https://archive.apache.org/dist/zookeeper/zookeeper-$latestZooKeeperVersion/apache-zookeeper-$latestZooKeeperVersion-bin.tar.gz"
 
 echo ""
 echo "Extracting the ZooKeeper binaries..."

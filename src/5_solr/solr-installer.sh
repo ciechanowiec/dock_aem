@@ -7,7 +7,7 @@ solrArchive="solr-$latestSolrVersion.tgz"
 
 echo ""
 echo "Downloading the latest Solr binaries..."
-curl --insecure --location --output "$solrArchive" "https://www.apache.org/dyn/closer.lua/solr/solr/$latestSolrVersion/$solrArchive?action=download"
+curl --insecure --location --output "$solrArchive" "https://archive.apache.org/dist/solr/solr/$latestSolrVersion/$solrArchive"
 
 echo ""
 echo "Extracting the Solr binaries..."
