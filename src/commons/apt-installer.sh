@@ -4,7 +4,8 @@ apt update
 apt upgrade -y
 apt install less -y && \
     apt install curl -y && \
-    apt install netcat -y && \
+#   Traditional instead of usual, because usual might cause problems for Windows users:
+    apt install netcat-traditional -y && \
     apt install zip -y && \
     apt install htop -y && \
     apt install lsof -y && \
