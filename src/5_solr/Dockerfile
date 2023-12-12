@@ -3,6 +3,7 @@ FROM aem-base:latest
 ARG SOLR_DIR
 ARG ZOOKEEPER_HOSTNAME
 ARG ZOOKEEPER_PORT
+ARG IS_UNSAFE
 
 WORKDIR ${SOLR_DIR}
 
@@ -12,6 +13,7 @@ RUN echo "Options = UnsafeLegacyRenegotiation" >> /etc/ssl/openssl.cnf
 
 COPY ../5_solr/solr-installer.sh .
 COPY ../5_solr/solr-starter.sh .
+COPY ../5_solr/jetty.xml .
 
 RUN ./solr-installer.sh
 RUN rm -v solr-installer.sh

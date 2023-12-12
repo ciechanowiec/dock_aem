@@ -246,6 +246,7 @@ services:
         SOLR_DIR: /opt/solr
         ZOOKEEPER_HOSTNAME: zookeeper
         ZOOKEEPER_PORT: 2181
+        IS_UNSAFE: true
     environment:
       SOLR_DIR: /opt/solr
       SOLR_PORT: 8983
@@ -262,6 +263,7 @@ services:
         mode: host
     depends_on:
       - aem-base
+      - zookeeper
 
   zookeeper:
     build:

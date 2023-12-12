@@ -27,6 +27,13 @@ sed -i 's|#ZK_HOST=""|ZK_HOST='"$ZOOKEEPER_HOSTNAME"':'"$ZOOKEEPER_PORT"'/solr|'
 echo "- enforcing chroot creation..."
 sed -i 's|#ZK_CREATE_CHROOT=true|ZK_CREATE_CHROOT=true|' "$solrEnvFile"
 
+# Designed for local environments to add a wildcard Access-Control-Allow-Origin header:
+if [ "$IS_UNSAFE" = "true" ]; then
+  echo "Updating Jetty settings..."
+  rm -v "$SOLR_DIR/server/etc/jetty.xml"
+  mv -v jetty.xml "$SOLR_DIR/server/etc/jetty.xml"
+fi
+
 echo ""
 echo "Cleanup..."
 rm -vrf "$tempDir"
