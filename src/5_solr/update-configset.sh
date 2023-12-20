@@ -24,7 +24,7 @@ help() {
     echo "   sh $(basename "$0") -d /var/solr/path/to/configus_setus"
     echo "   sh $(basename "$0") -d path/to/configus_setus"
     echo "   sh $(basename "$0") -d configus_setus"
-    echo "   sh $(basename "$0") -d configus_setus -u http://10.48.192.74:$SOLR_PORT"
+    echo "   sh $(basename "$0") -d configus_setus -u http://10.48.192.74:$SOLR_INTERNAL_PORT"
     exit 0
 }
 
@@ -63,7 +63,7 @@ showCurrentConfigSets() {
 ##############################
 #        DRIVING CODE        #
 ##############################
-defaultSolrURL="http://localhost:$SOLR_PORT"
+defaultSolrURL="http://localhost:$SOLR_INTERNAL_PORT"
 solrURL="$defaultSolrURL"
 configSetPath=""
 configSetName=""

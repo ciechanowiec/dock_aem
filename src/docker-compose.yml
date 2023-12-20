@@ -238,22 +238,21 @@ services:
     depends_on:
       - aem-base
 
-  solr:
+  solr1:
     build:
       context: .
       dockerfile: 5_solr/Dockerfile
       args:
         SOLR_DIR: /opt/solr
-        ZOOKEEPER_HOSTNAME: zookeeper
-        ZOOKEEPER_PORT: 2181
+        ZK_HOST: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
         IS_UNSAFE: true
     environment:
       SOLR_DIR: /opt/solr
-      SOLR_PORT: 8983
+      SOLR_INTERNAL_PORT: 8983
     image: solr:latest
-    container_name: solr
+    container_name: solr1
     entrypoint: ["sh", "-c", "$$SOLR_DIR/solr-starter.sh" ]
-    hostname: solr
+    hostname: solr1
     networks:
       - aem-network
     ports:
@@ -263,26 +262,130 @@ services:
         mode: host
     depends_on:
       - aem-base
-      - zookeeper
+      - zookeeper1
 
-  zookeeper:
+  solr2:
+    build:
+      context: .
+      dockerfile: 5_solr/Dockerfile
+      args:
+        SOLR_DIR: /opt/solr
+        ZK_HOST: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
+        IS_UNSAFE: true
+    environment:
+      SOLR_DIR: /opt/solr
+      SOLR_INTERNAL_PORT: 8983
+    image: solr:latest
+    container_name: solr2
+    entrypoint: ["sh", "-c", "$$SOLR_DIR/solr-starter.sh" ]
+    hostname: solr2
+    networks:
+      - aem-network
+    ports:
+      - target: 8983
+        published: 8984
+        protocol: tcp
+        mode: host
+    depends_on:
+      - aem-base
+      - zookeeper2
+
+  solr3:
+    build:
+      context: .
+      dockerfile: 5_solr/Dockerfile
+      args:
+        SOLR_DIR: /opt/solr
+        ZK_HOST: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
+        IS_UNSAFE: true
+    environment:
+      SOLR_DIR: /opt/solr
+      SOLR_INTERNAL_PORT: 8983
+    image: solr:latest
+    container_name: solr3
+    entrypoint: ["sh", "-c", "$$SOLR_DIR/solr-starter.sh" ]
+    hostname: solr3
+    networks:
+      - aem-network
+    ports:
+      - target: 8983
+        published: 8985
+        protocol: tcp
+        mode: host
+    depends_on:
+      - aem-base
+      - zookeeper3
+
+  zookeeper1:
     build:
       context: .
       dockerfile: 6_zookeeper/Dockerfile
       args:
         ZOOKEEPER_DIR: /opt/zookeeper
-        ZOOKEEPER_MY_ID: "1"
+        ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
     environment:
       ZOOKEEPER_DIR: /opt/zookeeper
+      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+      ZOOKEEPER_MY_ID: "1"
     image: zookeeper:latest
-    container_name: zookeeper
+    container_name: zookeeper1
     entrypoint: ["sh", "-c", "$$ZOOKEEPER_DIR/zookeeper-starter.sh" ]
-    hostname: zookeeper
+    hostname: zookeeper1
     networks:
       - aem-network
     ports:
       - target: 2181
         published: 2181
+        protocol: tcp
+        mode: host
+    depends_on:
+      - aem-base
+
+  zookeeper2:
+    build:
+      context: .
+      dockerfile: 6_zookeeper/Dockerfile
+      args:
+        ZOOKEEPER_DIR: /opt/zookeeper
+        ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+    environment:
+      ZOOKEEPER_DIR: /opt/zookeeper
+      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+      ZOOKEEPER_MY_ID: "2"
+    image: zookeeper:latest
+    container_name: zookeeper2
+    entrypoint: ["sh", "-c", "$$ZOOKEEPER_DIR/zookeeper-starter.sh" ]
+    hostname: zookeeper2
+    networks:
+      - aem-network
+    ports:
+      - target: 2181
+        published: 2182
+        protocol: tcp
+        mode: host
+    depends_on:
+      - aem-base
+
+  zookeeper3:
+    build:
+      context: .
+      dockerfile: 6_zookeeper/Dockerfile
+      args:
+        ZOOKEEPER_DIR: /opt/zookeeper
+        ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+    environment:
+      ZOOKEEPER_DIR: /opt/zookeeper
+      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+      ZOOKEEPER_MY_ID: "3"
+    image: zookeeper:latest
+    container_name: zookeeper3
+    entrypoint: ["sh", "-c", "$$ZOOKEEPER_DIR/zookeeper-starter.sh" ]
+    hostname: zookeeper3
+    networks:
+      - aem-network
+    ports:
+      - target: 2181
+        published: 2183
         protocol: tcp
         mode: host
     depends_on:

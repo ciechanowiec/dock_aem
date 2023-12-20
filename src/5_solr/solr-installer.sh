@@ -23,7 +23,7 @@ echo "Adjusting $solrEnvFile..."
 echo "- exposing Solr to the connections from the outside of the container..."
 sed -i 's|#SOLR_JETTY_HOST="127.0.0.1"|SOLR_JETTY_HOST="0.0.0.0"|' "$solrEnvFile"
 echo "- setting up a ZooKeeper host..."
-sed -i 's|#ZK_HOST=""|ZK_HOST='"$ZOOKEEPER_HOSTNAME"':'"$ZOOKEEPER_PORT"'/solr|' "$solrEnvFile"
+sed -i 's|#ZK_HOST=""|ZK_HOST='"$ZK_HOST"'/solr|' "$solrEnvFile"
 echo "- enforcing chroot creation..."
 sed -i 's|#ZK_CREATE_CHROOT=true|ZK_CREATE_CHROOT=true|' "$solrEnvFile"
 

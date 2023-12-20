@@ -26,19 +26,17 @@ rm -v "$zooKeeperArchive"
 # https://solr.apache.org/guide/solr/latest/deployment-guide/zookeeper-ensemble.html
 echo ""
 echo "Adjusting zoo.cfg"
-dataDir="/var/lib/zookeeper"
-myIDDir="$dataDir/$ZOOKEEPER_MY_ID"
-mkdir -p -v "$myIDDir"
-echo "$ZOOKEEPER_MY_ID" > "$myIDDir/myid"
 cat > "$ZOOKEEPER_DIR/conf/zoo.cfg" << EOF
 tickTime=2000
-dataDir=$dataDir
+dataDir=$ZOOKEEPER_DATA_DIR
 clientPort=2181
 4lw.commands.whitelist=*
 
 initLimit=5
 syncLimit=2
-server.1=zoo1:2888:3888
+server.1=zookeeper1:2888:3888
+server.2=zookeeper2:2888:3888
+server.3=zookeeper3:2888:3888
 
 autopurge.snapRetainCount=3
 autopurge.purgeInterval=1
