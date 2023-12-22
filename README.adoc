@@ -23,24 +23,27 @@
 _Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache, Apache Solr and Apache ZooKeeper instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
 
 == Usage
-_Dock AEM_ provides a `docker-compose.yml` file and related artifacts, enabling developers to:
 [upperalpha]
-. build various AEM and AEM-related images
-. run, start, and stop AEM and AEM-related containers
+. _Dock AEM_ provides a `docker-compose.yml` file and related artifacts, enabling developers to:
+[upperroman]
+.. build various AEM and AEM-related images
+.. run, start, and stop AEM and AEM-related containers
 
-Supported images include:
-[upperalpha]
-. AEM Author 6.5
-. AEM Author as a Cloud Service
-. AEM Publish 6.5
-. AEM Publish as a Cloud Service
-. AEM Dispatcher for AMD CPU architecture
-. AEM Dispatcher for ARM CPU architecture
-. Varnish Cache
-. Apache Solr
-. Apache ZooKeeper
+. Supported images include:
+[upperroman]
+.. AEM Author 6.5
+.. AEM Author as a Cloud Service
+.. AEM Publish 6.5
+.. AEM Publish as a Cloud Service
+.. AEM Dispatcher for AMD CPU architecture
+.. AEM Dispatcher for ARM CPU architecture
+.. Varnish Cache
+.. Apache Solr
+.. Apache ZooKeeper
 
-Apache Solr and Apache ZooKeeper are configured as a cluster of containers: 3x for Apache Solr and 3x for Apache ZooKeeper. However, all Apache Solr containers are based on the same `solr` image and all Apache ZooKeeper are based on the same `zookeeper` image.
+. Apache Solr and Apache ZooKeeper are configured as a cluster of containers: 3x for Apache Solr and 3x for Apache ZooKeeper. However, all Apache Solr containers are based on the same `solr` image and all Apache ZooKeeper are based on the same `zookeeper` image.
+
+. It is recommended that a machine, either virtual or real, on which _Dock AEM_ images are built and containers are used, has at least 12 GB RAM allocated. Otherwise, the respective Java processes started by the artifacts might be unexpectedly terminated.
 
 === Images Build
 
@@ -87,6 +90,10 @@ For instance, into `src/packages/65` the following packages can be put:
 [upperroman]
 .. `aem-service-pkg-6.5.16-NPR-40551-B002.zip` (AEM Service Pack 6.5.16)
 .. `adobe-aemfd-linux-pkg-6.0.914.zip` (AEM Forms Addon related to AEM 6.5.16)
++
+[NOTE]
+Regardless of the host operating system on which the images are built (Windows/macOS/Linux), in case of AEM Forms addon a Linux version of the addon should be chosen, since the Dock AEM images are based on Linux.
++
 .. `content.zip` (preinstalled content)
 
 +
