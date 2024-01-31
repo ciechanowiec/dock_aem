@@ -404,3 +404,5 @@ volumes:
 networks:
   aem-network:
     driver: bridge
+    # This name is required to avoid name prefixing by Docker:
+    name: aem-network

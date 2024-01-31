@@ -16,6 +16,9 @@ apt install less -y && \
     apt install tree -y && \
     apt install wget -y && \
     apt install unzip -y && \
+    apt install automake -y && \
+    apt install libtool -y && \
+    apt install python3-docutils -y && \
     apt install python3-pip -y && \
     apt install icdiff -y && \
     apt install ffmpeg -y && \
