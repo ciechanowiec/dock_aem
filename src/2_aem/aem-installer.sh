@@ -190,6 +190,24 @@ setAllReplicationAgents () {
   done
 }
 
+setMailService() {
+  echo "Setting com.day.cq.mailer.DefaultMailService..."
+  curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_PORT/system/console/configMgr/com.day.cq.mailer.DefaultMailService" \
+  --data-raw 'apply=true&action=ajaxConfigManager&%24location=launchpad%3Aresources%2Finstall%2F20%2Fcq-mailer-5.14.2.jar&smtp.host=fake-smtp-server&smtp.port=8025&smtp.user=myuser&smtp.password=mysecretpassword&from.address=aem-sender%40example.com&smtp.ssl=false&smtp.starttls=false&debug.email=true&debug.email=false&oauth.flow=false&propertylist=oath.flow%2Csmtp.host%2Csmtp.port%2Csmtp.user%2Csmtp.password%2Cfrom.address%2Csmtp.ssl%2Csmtp.starttls%2Cdebug.email%2Coauth.flow'
+  # Gives configuration like:
+  #  {
+  #    "smtp.host": "fake-smtp-server",
+  #    "smtp.port": 8025,
+  #    "smtp.user": "myuser",
+  #    "smtp.password": "mysecretpassword",
+  #    "from.address": "aem-sender@example.com",
+  #    "smtp.ssl": false,
+  #    "smtp.starttls": false,
+  #    "debug.email": true,
+  #    "oath.flow": false
+  #  }
+}
+
 ###################################
 #                                 #
 #          DRIVING CODE           #
@@ -213,6 +231,8 @@ if [[ "$RUN_MODES" == *"author"* ]]; then
   startAEMInBackground
   waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_SECOND_AND_SUBSEQUENT_STARTS"
   setAllReplicationAgents
+  sleep 3
+  setMailService
   # Without this sleep installation of some packages might not be successful:
   echo "Sleeping for 30 seconds to let AEM be fully initialized..."
   sleep 30

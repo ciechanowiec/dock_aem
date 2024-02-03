@@ -20,7 +20,7 @@
 
 == Overview
 
-_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache, Apache Solr and Apache ZooKeeper instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
+_Dock AEM_ is a program for setting up and managing local Adobe Experience Manager (AEM) development environment via Docker. It provides ready-to-go tools for swift bootstrapping and controlling interconnected AEM Author, AEM Publish, AEM Dispatcher, Varnish Cache, Apache Solr, Apache ZooKeeper and SMTP instances. The program supports both on-premise (AEM 6.5) and cloud (AEMaaCS) versions of Adobe Experience Manager.
 
 == Usage
 [upperalpha]
@@ -40,6 +40,7 @@ _Dock AEM_ is a program for setting up and managing local Adobe Experience Manag
 .. Varnish Cache
 .. Apache Solr
 .. Apache ZooKeeper
+.. https://github.com/gessnerfl/fake-smtp-server[Fake SMTP Server]
 
 . Apache Solr and Apache ZooKeeper are configured as a cluster of containers: 3x for Apache Solr and 3x for Apache ZooKeeper. However, all Apache Solr containers are based on the same `solr` image and all Apache ZooKeeper are based on the same `zookeeper` image.
 
@@ -61,7 +62,7 @@ git clone https://github.com/ciechanowiec/dock_aem
 +
 [source, bash]
 ----
-artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish solr1 solr2 solr3 zookeeper1 zookeeper2 zookeeper3"
+artifactsToRemove="aem-base aem-author-65 aem-author-cloud aem-publish-65 aem-publish-cloud dispatcher-amd dispatcher-arm varnish solr1 solr2 solr3 zookeeper1 zookeeper2 zookeeper3 fake-smtp-server"
 
 docker container stop --time 30 "$artifactsToRemove"
 

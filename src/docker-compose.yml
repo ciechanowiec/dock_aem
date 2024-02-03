@@ -391,6 +391,32 @@ services:
     depends_on:
       - aem-base
 
+  fake-smtp-server:
+    environment:
+      - FAKESMTP_AUTHENTICATION_USERNAME=myuser
+      - FAKESMTP_AUTHENTICATION_PASSWORD=mysecretpassword
+    image: gessnerfl/fake-smtp-server:2.1.3
+    container_name: fake-smtp-server
+    hostname: fake-smtp-server
+    networks:
+      - aem-network
+    ports:
+        # expose smtp port:
+      - target: 8025
+        published: 8025
+        protocol: tcp
+        mode: host
+        # expose web ui:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+        # expose management api:
+      - target: 8081
+        published: 8081
+        protocol: tcp
+        mode: host
+
 volumes:
   aem-author-65-data:
     name: "aem-author-65-data"
