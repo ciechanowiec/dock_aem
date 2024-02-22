@@ -171,9 +171,31 @@ setDispatcherReplicationAgent () {
   sleep 5
 }
 
-setAllReplicationAgents () {
+setPublishReverseReplicationAgent () {
   echo ""
-  echo "Setting up all replication agents..."
+  echo "Setting up a publish reverse replication agent..."
+  curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
+        -F "enabled=true" \
+        -F "transportPassword=admin" \
+        -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
+        -F "transportUser=admin" \
+        -F "userId=admin" \
+        "http://localhost:$AEM_PORT/etc/replication/agents.author/publish_reverse/jcr:content")
+  echo "$curlOutput"
+  if echo "$curlOutput" | grep -iq "Content modified"
+   then
+     echo "Response is OK"
+     IS_RESPONSE_OK=true
+  else
+     echo "Response is not OK"
+     IS_RESPONSE_OK=false
+  fi
+  sleep 5
+}
+
+setAllReplicationAgentsOnAuthor () {
+  echo ""
+  echo "Setting up replication agents on AEM Author..."
   IS_RESPONSE_OK=false
   while [ $IS_RESPONSE_OK = false ]; do
     setPublishReplicationAgentPartOne
@@ -187,6 +209,33 @@ setAllReplicationAgents () {
   IS_RESPONSE_OK=false
   while [ $IS_RESPONSE_OK = false ]; do
     setDispatcherReplicationAgent
+  done
+
+  IS_RESPONSE_OK=false
+  while [ $IS_RESPONSE_OK = false ]; do
+    setPublishReverseReplicationAgent
+  done
+}
+
+setAllReplicationAgentsOnPublish () {
+  echo ""
+  echo "Setting up an Outbox replication agent on AEM Publish..."
+  IS_RESPONSE_OK=false
+  while [ $IS_RESPONSE_OK = false ]; do
+    curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
+          -F "enabled=true" \
+          -F "userId=admin" \
+          "http://localhost:$AEM_PORT/etc/replication/agents.publish/outbox/jcr:content")
+    echo "$curlOutput"
+    if echo "$curlOutput" | grep -iq "Content modified"
+     then
+       echo "Response is OK"
+       IS_RESPONSE_OK=true
+    else
+       echo "Response is not OK"
+       IS_RESPONSE_OK=false
+    fi
+    sleep 5
   done
 }
 
@@ -219,6 +268,9 @@ updateSlingPropsForForms
 startAEMInBackground
 waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_FIRST_START"
 enableCRX
+if [[ "$RUN_MODES" == *"publish"* ]]; then
+  setAllReplicationAgentsOnPublish
+fi
 # Without this sleep installation of some packages might not be successful:
 echo "Sleeping for 60 seconds to let AEM be fully initialized..."
 sleep 60
@@ -230,7 +282,7 @@ updateSlingPropsForSQL
 if [[ "$RUN_MODES" == *"author"* ]]; then
   startAEMInBackground
   waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_SECOND_AND_SUBSEQUENT_STARTS"
-  setAllReplicationAgents
+  setAllReplicationAgentsOnAuthor
   sleep 3
   setMailService
   # Without this sleep installation of some packages might not be successful:

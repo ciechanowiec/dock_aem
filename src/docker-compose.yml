@@ -11,6 +11,7 @@ services:
       context: .
       dockerfile: 1_base/Dockerfile
     image: aem-base:latest
+    container_name: aem-base
     hostname: aem-base
     networks:
       - aem-network
