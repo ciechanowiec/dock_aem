@@ -76,7 +76,17 @@ enableCRX () {
 
 killAEM () {
   echo "AEM process will be terminated..."
-  fuser --namespace tcp --kill "$AEM_PORT"
+  fuser -TERM --namespace tcp --kill "$AEM_PORT"
+  while fuser "$AEM_PORT"/tcp > /dev/null 2>&1; do
+      echo "Latest logs:"
+      tail -n 5 "$AEM_DIR/crx-quickstart/logs/error.log"
+      echo "Waiting for AEM process to be terminated..."
+      sleep 15
+  done
+
+  echo "Latest logs:"
+  tail -n 5 "$AEM_DIR/crx-quickstart/logs/error.log"
+  echo "AEM process has been terminated"
   sleep 5
 }
 

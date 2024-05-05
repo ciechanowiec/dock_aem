@@ -1,6 +1,8 @@
 #!/bin/bash
 
-java \
+# exec is required in order to set the Java process as PID 1 inside the container, since Docker sends
+# termination signals only to PID 1, and we need those signals to be handled by the java process:
+exec java \
     -Xmx4096M \
     -Djdk.util.zip.disableZip64ExtraFieldValidation=true \
     -Djava.awt.headless=true \
