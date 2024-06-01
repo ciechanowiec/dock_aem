@@ -128,18 +128,18 @@ The initialization is assumed to be finished when all required bundles have star
 | _AEMaaCS_ +
 - author +
 - nosamplecontent +
-- aem-sdk-quickstart-2023.11.14227.20231108T162349Z-231100.jar +
-- aem-forms-addon-2023.10.25.00-231100.far
-|683
-|683
+- aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
+- aem-forms-addon-2024.05.04.00-240500.far
+|680
+|680
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
-- aem-sdk-quickstart-2023.11.14227.20231108T162349Z-231100.jar +
-- aem-forms-addon-2023.10.25.00-231100.far
-|677
-|677
+- aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
+- aem-forms-addon-2024.05.04.00-240500.far
+|674
+|674
 |===
 +
 [WARNING]

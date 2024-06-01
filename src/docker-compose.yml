@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-custom-variables:
   &global-variables
   AEM_PUBLISH_HOSTNAME: aem-publish
@@ -72,8 +70,8 @@ services:
         RUN_MODES: author,nosamplecontent,local,author-local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 683
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 683
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 680
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 680
     environment:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: cloud
@@ -162,8 +160,8 @@ services:
         RUN_MODES: publish,nosamplecontent,local,publish-local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 677
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 677
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 674
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 674
     environment:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: cloud
