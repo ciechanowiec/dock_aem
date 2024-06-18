@@ -172,7 +172,7 @@ docker compose build aem-author-cloud
 ----
 ====
 
-. Verify the build and make sure that all nine _Dock AEM_ images are available on host:
+. Verify the build and make sure that all _Dock AEM_ images are available on host:
 +
 [source, bash]
 ----
