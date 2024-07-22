@@ -120,6 +120,14 @@ The initialization is assumed to be finished when all required bundles have star
 | _AEM 6.5_ +
 - author/publish +
 - nosamplecontent +
+- aem-service-pkg-6.5.15.0.zip +
+- adobe-aemfd-linux-pkg-6.0.856.zip
+|717
+|723
+
+| _AEM 6.5_ +
+- author/publish +
+- nosamplecontent +
 - aem-service-pkg-6.5.16-NPR-40551-B002.zip +
 - adobe-aemfd-linux-pkg-6.0.914.zip
 |719
@@ -129,17 +137,17 @@ The initialization is assumed to be finished when all required bundles have star
 - author +
 - nosamplecontent +
 - aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
-- aem-forms-addon-2024.05.04.00-240500.far
-|680
-|680
+- aem-forms-addon-2024.07.05.00-240600.far
+|683
+|683
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
 - aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
-- aem-forms-addon-2024.05.04.00-240500.far
-|674
-|674
+- aem-forms-addon-2024.07.05.00-240600.far
+|677
+|677
 |===
 +
 [WARNING]
