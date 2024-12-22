@@ -89,8 +89,8 @@ If there are any packages that should be preinstalled on AEM Author and AEM Publ
 +
 For instance, into `src/packages/65` the following packages can be put:
 [upperroman]
-.. `aem-service-pkg-6.5.16-NPR-40551-B002.zip` (AEM Service Pack 6.5.16)
-.. `adobe-aemfd-linux-pkg-6.0.914.zip` (AEM Forms Addon related to AEM 6.5.16)
+.. `aem-service-pkg-6.5.22.0.zip` (AEM Service Pack 6.5.22)
+.. `adobe-aemfd-linux-pkg-6.0.1328.zip` (AEM Forms Addon related to AEM 6.5.22)
 +
 [NOTE]
 Regardless of the host operating system on which the images are built (Windows/macOS/Linux), in case of AEM Forms addon a Linux version of the addon should be chosen, since the Dock AEM images are based on Linux.
@@ -114,9 +114,10 @@ The initialization is assumed to be finished when all required bundles have star
 +
 
 .Expected bundles status for selected AEM setups
-[cols="4,2,2"]
+[cols="4,^.^2,^.^2"]
 |===
 | |First Start |Second and Subsequent Starts
+
 | _AEM 6.5_ +
 - author/publish +
 - nosamplecontent +
@@ -133,21 +134,29 @@ The initialization is assumed to be finished when all required bundles have star
 |719
 |725
 
+| _AEM 6.5_ +
+- author/publish +
+- nosamplecontent +
+- aem-service-pkg-6.5.22.0.zip +
+- adobe-aemfd-linux-pkg-6.0.1328.zip
+|732
+|739
+
 | _AEMaaCS_ +
 - author +
 - nosamplecontent +
-- aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
-- aem-forms-addon-2024.07.05.00-240600.far
-|683
-|683
+- aem-sdk-quickstart-2024.11.18751.20241128T090041Z-241100.jar +
+- aem-forms-addon-2024.10.23.06-241100.far
+|694
+|694
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
-- aem-sdk-quickstart-2024.5.16461.20240524T172309Z-240500.jar +
-- aem-forms-addon-2024.07.05.00-240600.far
-|677
-|677
+- aem-sdk-quickstart-2024.11.18751.20241128T090041Z-241100.jar +
+- aem-forms-addon-2024.10.23.06-241100.far
+|687
+|687
 |===
 +
 [WARNING]
@@ -386,7 +395,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/deploying/deployin
 == License
 The program is subject to MIT No Attribution License
 
-Copyright © 2023-2024 Herman Ciechanowiec
+Copyright © 2023-2025 Herman Ciechanowiec
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
 

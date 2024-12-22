@@ -25,8 +25,8 @@ services:
         RUN_MODES: author,nosamplecontent,local,author-local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 717
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 723
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 732
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 739
     environment:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: 65
@@ -70,8 +70,8 @@ services:
         RUN_MODES: author,nosamplecontent,local,author-local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 688
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 688
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 694
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 694
     environment:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: cloud
@@ -115,8 +115,8 @@ services:
         RUN_MODES: publish,nosamplecontent,local,publish-local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 717
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 723
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 732
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 739
     environment:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: 65
@@ -160,8 +160,8 @@ services:
         RUN_MODES: publish,nosamplecontent,local,publish-local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 682
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 682
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 687
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 687
     environment:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: cloud
