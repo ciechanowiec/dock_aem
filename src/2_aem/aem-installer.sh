@@ -267,6 +267,29 @@ setMailService() {
   #  }
 }
 
+warmupScripts() {
+  echo "Warming up AEM rendering scripts..."
+  curl --verbose "http://localhost:$AEM_PORT/libs/granite/core/content/login.html" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/aem/start.html" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/sites.html/content" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/assets.html/content/dam" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/aem/forms.html/content/dam/formsanddocuments" > /dev/null
+  sleep 5
+}
+
+disableAuthoringHints() {
+  echo "Disabling authoring hints..."
+  ADMIN_USER_JCR_PATH=$(curl --verbose --user "admin:$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/bin/querybuilder.json?path=/home/users&type=rep:User&property=rep:authorizableId&property.value=admin&p.limit=-1" | jq -r '.hits[0].path')
+  curl --verbose --user "admin:$ADMIN_PASSWORD" \
+  "http://localhost:$AEM_PORT/$ADMIN_USER_JCR_PATH/preferences" \
+  -F "jcr:primaryType=nt:unstructured" \
+  -F "cq.authoring.editor.page.showOnboarding62=false" \
+  -F "cq.authoring.editor.page.showOnboarding62@TypeHint=String" \
+  -F "granite.shell.showonboarding620=false" \
+  -F "granite.shell.showonboarding620@TypeHint=String"
+  sleep 5
+}
+
 ###################################
 #                                 #
 #          DRIVING CODE           #
@@ -278,6 +301,8 @@ updateSlingPropsForForms
 startAEMInBackground
 waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_FIRST_START"
 enableCRX
+warmupScripts
+disableAuthoringHints
 if [[ "$RUN_MODES" == *"publish"* ]]; then
   setAllReplicationAgentsOnPublish
 fi
