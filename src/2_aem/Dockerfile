@@ -7,6 +7,7 @@ ARG AEM_PORT
 ARG DEBUG_PORT
 ARG NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START
 ARG NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS
+ARG LICENSE_KEY
 ARG AEM_PUBLISH_HOSTNAME
 ARG DISPATCHER_HOSTNAME
 
@@ -14,7 +15,6 @@ WORKDIR ${AEM_DIR}
 
 COPY ../quickstart/${AEM_TYPE}/aem-quickstart.jar .
 COPY ../commons/crypto/data ./data
-COPY ../commons/license.properties .
 COPY ../commons/passwordfile.properties .
 COPY ../2_aem/aem-installer.sh .
 COPY ../2_aem/aem-starter.sh .

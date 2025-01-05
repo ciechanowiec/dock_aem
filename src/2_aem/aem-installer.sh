@@ -268,6 +268,7 @@ setMailService() {
 }
 
 warmupScripts() {
+  echo ""
   echo "Warming up AEM rendering scripts..."
   curl --verbose "http://localhost:$AEM_PORT/libs/granite/core/content/login.html" > /dev/null
   curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/aem/start.html" > /dev/null
@@ -278,6 +279,7 @@ warmupScripts() {
 }
 
 disableAuthoringHints() {
+  echo ""
   echo "Disabling authoring hints..."
   ADMIN_USER_JCR_PATH=$(curl --verbose --user "admin:$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/bin/querybuilder.json?path=/home/users&type=rep:User&property=rep:authorizableId&property.value=admin&p.limit=-1" | jq -r '.hits[0].path')
   curl --verbose --user "admin:$ADMIN_PASSWORD" \
