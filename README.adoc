@@ -75,9 +75,13 @@ docker volume remove --force aem-author-65-data aem-author-cloud-data aem-publis
 docker network rm aem-network
 ----
 
-. `license.properties`
+. License Key
 +
-Put a `license.properties` file into `src/commons` directory. It will be used during the build for both AEM 6.5 and AEMaaCS.
+Create an `src/.env` file in the _Dock AEM_ source code repository. Inside that file define a `LICENSE_KEY` environmental variable with the value of the license key for AEM. Among others, that value is provided in a file named `license.properties` delivered by Adobe and defined in that `license.properties` file as `license.downloadID`. After that operation, the content of the `src/.env` file should look like this (`<you-license-key>` should be replaced with the actual license key):
+
+    LICENSE_KEY=<you-license-key>
++
+The `src/.env` file is git-ignored, so there is no relevant risk of exposing it in the source control.
 
 . `src/quickstart`
 +
@@ -108,7 +112,7 @@ The `src/packages/cloud` directory, in turn, can be populated with these package
 +
 An `src/commons/crypto` directory contains a `data` directory with default `hmac` and `master` keys. Those keys are used by `com.adobe.granite.crypto.file` bundle for secrets encoding and default versions of the keys are provided for deterministic and predictable behavior. If it is necessary to use different keys, replace the existing ones with the new ones. However, note that those keys aren't git-ignored, so be careful and don't git commit sensitive secrets.
 
-. During the images build, AEM Author and AEM Publish instances are started. Among others, this is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_aem/aem-starter.sh` script. That script also shutdowns the instances once the initialization is finished.
+. During the images build, AEM Author and AEM Publish instances are started. Among others, this is done in order to initialize persistence layer and reduce the amount of time required for the first clean start of containers based on the built images. The start of AEM Author and AEM Publish is controlled by `src/2_aem/aem-installer.sh` script. That script also shutdowns the instances once the initialization is finished.
 +
 The initialization is assumed to be finished when all required bundles have started and are active. The amount of required bundles might differ depending on the exact set of preinstalled packages from `src/packages`, on run mode choice (`author`/`publish`, `samplecontent`/`nosamplecontent`) and the subsequent number of an instance start.
 +
@@ -240,6 +244,8 @@ docker compose up solr1 solr2 solr3 --detach
 +
 [NOTE]
 In case of certain system setups, the commands above should be hyphenated: `docker-compose`.
+
+. All AEM images have a license key embedded during the build. That license key can be overridden by providing a `LICENSE_KEY` environmental variable when a given AEM container is run _for the first time_.
 
 . After the first run a given container can be started and stopped via regular Docker commands by providing respective container names, like in these examples:
 +

@@ -9,7 +9,7 @@ log
 target
 .DS_Store
 # Don't keep proprietary files in git:
-/src/commons/license.properties
+/src/.env
 /src/quickstart/65/*
 !src/quickstart/65/.gitkeep
 /src/quickstart/cloud/*

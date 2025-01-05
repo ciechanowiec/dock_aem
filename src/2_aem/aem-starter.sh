@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if [ -n "$LICENSE_KEY" ]; then
+echo "Setting a new license"
+cat > "$AEM_DIR/license.properties" << EOF
+license.product.name=Adobe Experience Manager
+license.customer.name=AEM Customer
+license.product.version=default
+license.downloadID=$LICENSE_KEY
+EOF
+fi
+
 # exec is required in order to set the Java process as PID 1 inside the container, since Docker sends
 # termination signals only to PID 1, and we need those signals to be handled by the java process:
 exec java \
