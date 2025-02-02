@@ -25,8 +25,8 @@ services:
         RUN_MODES: author,nosamplecontent,local,author-local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 732
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 739
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 733
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 740
         LICENSE_KEY: ${LICENSE_KEY:-}
     environment:
       AEM_DIR: /opt/aem/author
@@ -60,9 +60,6 @@ services:
         mode: host
     depends_on:
       - aem-base
-    env_file:
-      - path: ./build-params.env
-        required: false
 
   aem-author-cloud:
     build:
@@ -75,8 +72,8 @@ services:
         RUN_MODES: author,nosamplecontent,local,author-local
         AEM_PORT: 4502
         DEBUG_PORT: 8888
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 694
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 694
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 695
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 695
         LICENSE_KEY: ${LICENSE_KEY:-}
     environment:
       AEM_DIR: /opt/aem/author
@@ -110,9 +107,6 @@ services:
         mode: host
     depends_on:
       - aem-base
-    env_file:
-      - path: ./build-params.env
-        required: false
 
   aem-publish-65:
     build:
@@ -125,8 +119,8 @@ services:
         RUN_MODES: publish,nosamplecontent,local,publish-local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 732
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 739
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 733
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 740
         LICENSE_KEY: ${LICENSE_KEY:-}
     environment:
       AEM_DIR: /opt/aem/publish
@@ -160,9 +154,6 @@ services:
         mode: host
     depends_on:
       - aem-base
-    env_file:
-      - path: ./build-params.env
-        required: false
 
   aem-publish-cloud:
     build:
@@ -175,8 +166,8 @@ services:
         RUN_MODES: publish,nosamplecontent,local,publish-local
         AEM_PORT: 4503
         DEBUG_PORT: 8889
-        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 687
-        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 687
+        NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 688
+        NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 688
         LICENSE_KEY: ${LICENSE_KEY:-}
     environment:
       AEM_DIR: /opt/aem/publish
@@ -210,9 +201,6 @@ services:
         mode: host
     depends_on:
       - aem-base
-    env_file:
-      - path: ./build-params.env
-        required: false
 
   dispatcher-amd:
     build:

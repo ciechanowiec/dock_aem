@@ -15,6 +15,18 @@ IS_RESPONSE_OK=false
 #                                 #
 ###################################
 
+installSearchWebConsolePlugin () {
+  echo "Installing Search Web Console Plugin for Apache Felix..."
+  # Plugin: https://github.com/neva-dev/felix-search-webconsole-plugin
+  INSTALL_DIR="$AEM_DIR/crx-quickstart/install"
+  mkdir --parents --verbose "$INSTALL_DIR"
+  SEARCH_PLUGIN_DOWNLOAD_URL=$(curl --silent https://api.github.com/repos/neva-dev/felix-search-webconsole-plugin/releases/latest \
+    | grep browser_download_url \
+    | grep ".jar" \
+    | cut -d '"' -f 4)
+  curl --location "$SEARCH_PLUGIN_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$SEARCH_PLUGIN_DOWNLOAD_URL")"
+}
+
 updateSlingPropsForForms () {
   echo ""
   echo "Updating Sling properties related to AEM Forms..."
@@ -49,10 +61,10 @@ waitUntilBundlesStatusMatch () {
   isInitializationFinalized=false
   while [ $isInitializationFinalized = false ]; do
     updateActualBundlesStatus
-    date
     echo ""
     echo "Latest logs:"
     tail -n 30 "$AEM_DIR/crx-quickstart/logs/error.log"
+    date
     echo "Actual bundles status: $ACTUAL_BUNDLES_STATUS"
     echo "Expected bundles status: $expectedBundlesStatus"
     if [[ "$ACTUAL_BUNDLES_STATUS" =~ .*"$expectedBundlesStatus".* ]]
@@ -298,6 +310,7 @@ disableAuthoringHints() {
 #                                 #
 ###################################
 
+installSearchWebConsolePlugin
 updateSlingPropsForForms
 
 startAEMInBackground
