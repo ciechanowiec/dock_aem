@@ -337,6 +337,13 @@ _Docs:_ +
 +
 `-Djava.awt.headless=true`
 
+. Set the secrets directory for Apache Felix OSGi Configuration interpolation:
++
+`-Dorg.apache.felix.configadmin.plugin.interpolation.secretsdir=/mnt/secrets`
++
+_Docs:_ +
+https://github.com/apache/felix-dev/blob/e479f6517c4bcbf5fcdd73c20b8760fe1610ab3a/configadmin-plugins/interpolation/README.md?plain=1#L131
+
 . Set JVM specific parameters for Java 11:
 +
 `-XX:+UseParallelGC --add-opens=java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED --add-opens=java.base/sun.net.www.protocol.jrt=ALL-UNNAMED --add-opens=java.naming/javax.naming.spi=ALL-UNNAMED --add-opens=java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED -Dnashorn.args=--no-deprecation-warning`
@@ -363,7 +370,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/administering/secu
 
 . Set run modes. The hyphenated `author-local` run mode is required for cases where dot-driven run mode like `author.local` isn't supported:
 +
-`-Dsling.run.modes=author,nosamplecontent,local,author-local`
+`-Dsling.run.modes=author,nosamplecontent,local,author-local,docker`
 +
 _Docs:_ +
 https://experienceleague.adobe.com/docs/experience-manager-65/deploying/configuring/configure-runmodes.html?lang=en
