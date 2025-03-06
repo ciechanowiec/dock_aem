@@ -3,6 +3,7 @@
 apt update
 apt upgrade -y
 apt install less -y && \
+    apt install git -y && \
     apt install curl -y && \
 #   Traditional instead of usual, because usual might cause problems for Windows users:
     apt install netcat-traditional -y && \
