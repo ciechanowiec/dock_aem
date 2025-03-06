@@ -89,6 +89,7 @@ enableCRX () {
 killAEM () {
   echo "AEM process will be terminated..."
   fuser -TERM --namespace tcp --kill "$AEM_PORT"
+  echo ""
   while fuser "$AEM_PORT"/tcp > /dev/null 2>&1; do
       echo "Latest logs:"
       tail -n 5 "$AEM_DIR/crx-quickstart/logs/error.log"
@@ -159,18 +160,36 @@ setPublishReplicationAgentPartOne () {
 setPublishReplicationAgentPartTwo () {
   echo ""
   echo "Setting up a publish replication agent, part 2 of 2..."
-  curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
+
+  # First, check if the resource is available (HTTP 200) (for `samplecontent` run mode the resource is absent).
+  getResponse=$(curl --user "admin:${ADMIN_PASSWORD}" \
+                     --write-out "%{http_code}" \
+                     --silent \
+                     --output /dev/null \
+                     "http://localhost:${AEM_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
+
+  if [ "$getResponse" -eq 200 ]; then
+    # If the resource is available, perform the delete operation:
+    curlOutput=$(curl --verbose --user "admin:${ADMIN_PASSWORD}" \
       -F ":operation=delete" \
-      "http://localhost:$AEM_PORT/etc/replication/agents.author/publish/jcr:content/userId")
-  echo "$curlOutput"
-  if echo "$curlOutput" | grep -iq "Content modified"
-   then
-     echo "Response is OK"
-     IS_RESPONSE_OK=true
+      "http://localhost:${AEM_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
+    echo "$curlOutput"
+
+    # Check if the delete operation succeeded based on the response content:
+    if echo "$curlOutput" | grep -iq "Content modified"; then
+      echo "Response is OK"
+      IS_RESPONSE_OK=true
+    else
+      echo "Response is not OK"
+      IS_RESPONSE_OK=false
+    fi
   else
-     echo "Response is not OK"
-     IS_RESPONSE_OK=false
+    # If resource is not available (not 200), skip deletion logic, mark response as OK:
+    echo "Response is OK"
+    IS_RESPONSE_OK=true
   fi
+
+  # Wait a bit before continuing:
   sleep 5
 }
 
@@ -223,10 +242,10 @@ setAllReplicationAgentsOnAuthor () {
     setPublishReplicationAgentPartOne
   done
 
-  IS_RESPONSE_OK=false
-  while [ $IS_RESPONSE_OK = false ]; do
-    setPublishReplicationAgentPartTwo
-  done
+#  IS_RESPONSE_OK=false
+#  while [ $IS_RESPONSE_OK = false ]; do
+#    setPublishReplicationAgentPartTwo
+#  done
 
   IS_RESPONSE_OK=false
   while [ $IS_RESPONSE_OK = false ]; do
