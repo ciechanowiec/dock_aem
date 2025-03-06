@@ -1,8 +1,10 @@
 #!/bin/bash
 
+echo "1. Installing apt packages..."
 apt update
 apt upgrade -y
 apt install less -y && \
+    apt install git -y && \
     apt install git -y && \
     apt install curl -y && \
 #   Traditional instead of usual, because usual might cause problems for Windows users:
@@ -27,3 +29,14 @@ apt install less -y && \
     apt install tesseract-ocr -y && \
     apt install libtesseract-dev -y && \
     apt install imagemagick -y
+
+echo "2. Installing SDKMAN..."
+curl -s "https://get.sdkman.io" | bash
+sleep 3 # Required for the above command to be fully completed
+
+echo "3. Sourcing SDKMAN..."
+export SDKMAN_DIR="$HOME/.sdkman"
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+echo "4. Installing Maven..."
+yes | sdk install maven 3.9.6

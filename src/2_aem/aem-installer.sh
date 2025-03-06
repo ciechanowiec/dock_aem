@@ -242,10 +242,10 @@ setAllReplicationAgentsOnAuthor () {
     setPublishReplicationAgentPartOne
   done
 
-#  IS_RESPONSE_OK=false
-#  while [ $IS_RESPONSE_OK = false ]; do
-#    setPublishReplicationAgentPartTwo
-#  done
+  IS_RESPONSE_OK=false
+  while [ $IS_RESPONSE_OK = false ]; do
+    setPublishReplicationAgentPartTwo
+  done
 
   IS_RESPONSE_OK=false
   while [ $IS_RESPONSE_OK = false ]; do
