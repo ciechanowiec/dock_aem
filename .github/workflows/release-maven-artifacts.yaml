@@ -1,4 +1,4 @@
-name: 'Release: Maven Artifacts'
+name: 'Release Maven Artifacts'
 
 on:
   workflow_dispatch:

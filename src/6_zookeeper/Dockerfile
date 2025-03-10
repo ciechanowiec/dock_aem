@@ -1,4 +1,4 @@
-FROM aem-base:latest
+FROM ciechanowiec/aem-base:1.0.3-SNAPSHOT
 
 ARG ZOOKEEPER_DIR
 ARG ZOOKEEPER_MY_ID
