@@ -2,13 +2,14 @@ x-custom-variables:
   &global-variables
   AEM_PUBLISH_HOSTNAME: aem-publish
   DISPATCHER_HOSTNAME: dispatcher
+  DOCK_AEM_VERSION: ${DOCK_AEM_VERSION}
 
 services:
   aem-base:
     build:
       context: .
       dockerfile: 1_base/Dockerfile
-    image: aem-base:latest
+    image: aem-base:${DOCK_AEM_VERSION:-latest}
     container_name: aem-base
     hostname: aem-base
     networks:

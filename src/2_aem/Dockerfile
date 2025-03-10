@@ -1,4 +1,5 @@
-FROM aem-base:latest
+ARG DOCK_AEM_VERSION
+FROM aem-base:${DOCK_AEM_VERSION}
 
 ARG AEM_DIR
 ARG AEM_TYPE
