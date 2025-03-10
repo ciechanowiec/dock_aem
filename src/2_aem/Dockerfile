@@ -1,4 +1,4 @@
-FROM ciechanowiec/aem-base:1.0.3-SNAPSHOT
+FROM ciechanowiec/aem-base:1.0.3
 
 ARG AEM_DIR
 ARG AEM_TYPE
