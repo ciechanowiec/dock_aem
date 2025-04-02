@@ -77,11 +77,11 @@ docker network rm aem-network
 
 . AEM License Key
 +
-AEM license key should be defined as environmental variable named `LICENSE_KEY`. One of the ways to achieve that is to export the variable in the console session in which the images are built (`<you-license-key>` should be replaced with the actual license key):
+AEM license key should be defined as environmental variable named `LICENSE_KEY`. One of the ways to achieve that is to export the variable in the console session in which the images are built (`<your-license-key>` should be replaced with the actual license key):
 +
 [source, bash]
 ----
-export LICENSE_KEY=<you-license-key>
+export LICENSE_KEY=<your-license-key>
 ----
 +
 [NOTE]
