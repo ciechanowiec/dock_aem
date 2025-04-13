@@ -1,4 +1,4 @@
-FROM ciechanowiec/aem-base:1.0.4
+FROM ciechanowiec/aem-base:1.0.6-SNAPSHOT
 
 ARG SOLR_DIR
 ARG ZK_HOST

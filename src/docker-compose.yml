@@ -8,7 +8,7 @@ services:
     build:
       context: .
       dockerfile: 1_base/Dockerfile
-    image: ciechanowiec/aem-base:1.0.4
+    image: ciechanowiec/aem-base:1.0.6-SNAPSHOT
     container_name: aem-base
     hostname: aem-base
     networks:
@@ -23,7 +23,9 @@ services:
         AEM_DIR: /opt/aem/author
         AEM_TYPE: 65
         RUN_MODES: author,nosamplecontent,local,author-local,docker
-        AEM_PORT: 4502
+        INSTALL_WKND_SAMPLE: false
+        AEM_HTTP_PORT: 4502
+        AEM_HTTPS_PORT: 8443
         DEBUG_PORT: 8888
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 733
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 740
@@ -33,7 +35,8 @@ services:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: 65
       RUN_MODES: author,nosamplecontent,local,author-local,docker
-      AEM_PORT: 4502
+      AEM_HTTP_PORT: 4502
+      AEM_HTTPS_PORT: 8443
       DEBUG_PORT: 8888
       LICENSE_KEY: ${LICENSE_KEY:-}
       SECRETS_DIR: /mnt/secrets
@@ -60,6 +63,10 @@ services:
         published: 4502
         protocol: tcp
         mode: host
+      - target: 8443
+        published: 8443
+        protocol: tcp
+        mode: host
       - target: 8888
         published: 8888
         protocol: tcp
@@ -76,7 +83,9 @@ services:
         AEM_DIR: /opt/aem/author
         AEM_TYPE: cloud
         RUN_MODES: author,nosamplecontent,local,author-local,docker
-        AEM_PORT: 4502
+        INSTALL_WKND_SAMPLE: false
+        AEM_HTTP_PORT: 4502
+        AEM_HTTPS_PORT: 8443
         DEBUG_PORT: 8888
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 698
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 698
@@ -86,7 +95,8 @@ services:
       AEM_DIR: /opt/aem/author
       AEM_TYPE: cloud
       RUN_MODES: author,nosamplecontent,local,author-local,docker
-      AEM_PORT: 4502
+      AEM_HTTP_PORT: 4502
+      AEM_HTTPS_PORT: 8443
       DEBUG_PORT: 8888
       LICENSE_KEY: ${LICENSE_KEY:-}
       SECRETS_DIR: /mnt/secrets
@@ -113,6 +123,10 @@ services:
         published: 4502
         protocol: tcp
         mode: host
+      - target: 8443
+        published: 8443
+        protocol: tcp
+        mode: host
       - target: 8888
         published: 8888
         protocol: tcp
@@ -129,7 +143,9 @@ services:
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: 65
         RUN_MODES: publish,nosamplecontent,local,publish-local,docker
-        AEM_PORT: 4503
+        INSTALL_WKND_SAMPLE: false
+        AEM_HTTP_PORT: 4503
+        AEM_HTTPS_PORT: 8444
         DEBUG_PORT: 8889
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 733
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 740
@@ -139,7 +155,8 @@ services:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: 65
       RUN_MODES: publish,nosamplecontent,local,publish-local,docker
-      AEM_PORT: 4503
+      AEM_HTTP_PORT: 4503
+      AEM_HTTPS_PORT: 8444
       DEBUG_PORT: 8889
       LICENSE_KEY: ${LICENSE_KEY:-}
       SECRETS_DIR: /mnt/secrets
@@ -166,6 +183,10 @@ services:
         published: 4503
         protocol: tcp
         mode: host
+      - target: 8444
+        published: 8444
+        protocol: tcp
+        mode: host
       - target: 8889
         published: 8889
         protocol: tcp
@@ -182,7 +203,9 @@ services:
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: cloud
         RUN_MODES: publish,nosamplecontent,local,publish-local,docker
-        AEM_PORT: 4503
+        INSTALL_WKND_SAMPLE: false
+        AEM_HTTP_PORT: 4503
+        AEM_HTTPS_PORT: 8444
         DEBUG_PORT: 8889
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 692
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 692
@@ -192,7 +215,8 @@ services:
       AEM_DIR: /opt/aem/publish
       AEM_TYPE: cloud
       RUN_MODES: publish,nosamplecontent,local,publish-local,docker
-      AEM_PORT: 4503
+      AEM_HTTP_PORT: 4503
+      AEM_HTTPS_PORT: 8444
       DEBUG_PORT: 8889
       LICENSE_KEY: ${LICENSE_KEY:-}
       SECRETS_DIR: /mnt/secrets
@@ -217,6 +241,10 @@ services:
     ports:
       - target: 4503
         published: 4503
+        protocol: tcp
+        mode: host
+      - target: 8444
+        published: 8444
         protocol: tcp
         mode: host
       - target: 8889

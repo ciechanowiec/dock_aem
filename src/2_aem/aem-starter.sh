@@ -27,6 +27,6 @@ exec java \
     -Dsling.run.modes="$RUN_MODES" \
     -jar "$AEM_DIR/aem-quickstart.jar" \
     -nointeractive \
-    -port "$AEM_PORT" \
+    -port "$AEM_HTTP_PORT" \
     -nofork \
     -nobrowser

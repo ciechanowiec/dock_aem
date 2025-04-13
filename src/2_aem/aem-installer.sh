@@ -27,6 +27,30 @@ installSearchWebConsolePlugin () {
   curl --location "$SEARCH_PLUGIN_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$SEARCH_PLUGIN_DOWNLOAD_URL")"
 }
 
+installWKND() {
+  echo "Installing WKND sample project..."
+  INSTALL_DIR="$AEM_DIR/crx-quickstart/install"
+  mkdir --parents --verbose "$INSTALL_DIR"
+  if [ "$AEM_TYPE" = "cloud" ]; then
+    AEM_GUIDES_DOWNLOAD_URL=$(curl --silent https://api.github.com/repos/adobe/aem-guides-wknd/releases/latest \
+      | grep browser_download_url \
+      | grep "all-.*\.zip" \
+      | grep -v "classic" \
+      | cut -d '"' -f 4)
+    echo "Will download the WKND sample project from: $AEM_GUIDES_DOWNLOAD_URL"
+    curl --location "$AEM_GUIDES_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$AEM_GUIDES_DOWNLOAD_URL")"
+  elif [ "$AEM_TYPE" = "65" ]; then
+    AEM_GUIDES_DOWNLOAD_URL=$(curl --silent https://api.github.com/repos/adobe/aem-guides-wknd/releases/latest \
+      | grep browser_download_url \
+      | grep "all-.*-classic\.zip" \
+      | cut -d '"' -f 4)
+    echo "Will download the WKND sample project from: $AEM_GUIDES_DOWNLOAD_URL"
+    curl --location "$AEM_GUIDES_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$AEM_GUIDES_DOWNLOAD_URL")"
+  else
+    echo "No AEM type specified, aborting WKND installation..."
+  fi
+}
+
 updateSlingPropsForForms () {
   echo ""
   echo "Updating Sling properties related to AEM Forms..."
@@ -53,7 +77,7 @@ startAEMInBackground () {
 updateActualBundlesStatus () {
   echo ""
   echo "Updating actual bundles status..."
-  ACTUAL_BUNDLES_STATUS=$(curl --verbose --user admin:"$ADMIN_PASSWORD" "localhost:$AEM_PORT/system/console/bundles.json" | jq --raw-output ".status")
+  ACTUAL_BUNDLES_STATUS=$(curl --verbose --user admin:"$ADMIN_PASSWORD" "localhost:$AEM_HTTP_PORT/system/console/bundles.json" | jq --raw-output ".status")
 }
 
 waitUntilBundlesStatusMatch () {
@@ -80,17 +104,76 @@ waitUntilBundlesStatusMatch () {
   isInitializationFinalized=false
 }
 
+enableHTTPS () {
+  # Docs: https://experienceleague.adobe.com/en/docs/experience-manager-learn/foundation/security/use-the-ssl-wizard#self-signed-private-key-and-certificate
+  echo ""
+  echo "Enabling HTTPS..."
+  CURRENT_DIR=$(pwd)
+  mkdir --parents --verbose "$AEM_DIR/certificates"
+  cd "$AEM_DIR/certificates" || exit
+
+  echo "Generating certificates..."
+  # 1) Create a Private Key that is encrypted with passphrase "admin"
+  openssl genrsa -aes256 \
+    -passout pass:admin \
+    -out localhostprivate.key 4096
+
+  # 2) Generate Certificate Signing Request (CSR) using the encrypted private key
+  openssl req -sha256 \
+    -passin pass:admin \
+    -new \
+    -key localhostprivate.key \
+    -out localhost.csr \
+    -subj '/CN=localhost'
+
+  # 3) Generate the SSL certificate, sign it with the same private key, and set it to expire after one year
+  openssl x509 -req \
+    -passin pass:admin \
+    -extfile <(printf "subjectAltName=DNS:localhost") \
+    -days 1825 \
+    -in localhost.csr \
+    -signkey localhostprivate.key \
+    -out localhost.crt
+
+  # 4) Convert the Private Key to DER format (non-interactive, reading passphrase "admin" and outputting an unencrypted DER file)
+  openssl pkcs8 \
+    -passin pass:admin \
+    -topk8 \
+    -inform PEM \
+    -outform DER \
+    -in localhostprivate.key \
+    -out localhostprivate.der \
+    -nocrypt
+
+  echo "Enabling SSL in AEM..."
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/libs/granite/security/post/sslSetup.html" \
+    -X POST \
+    -F "keystorePassword=admin" \
+    -F "keystorePasswordConfirm=admin" \
+    -F "truststorePassword=admin" \
+    -F "truststorePasswordConfirm=admin" \
+    -F "privatekeyFile=@$AEM_DIR/certificates/localhostprivate.der;type=application/x-x509-ca-cert" \
+    -F "certificateFile=@$AEM_DIR/certificates/localhost.crt;type=application/x-x509-ca-cert" \
+    -F "httpsHostname=localhost" \
+    -F "httpsPort=$AEM_HTTPS_PORT"
+  cd "$CURRENT_DIR" || exit
+  rm -rfv "$AEM_DIR/certificates"
+  sleep 10
+  echo "Latest logs:"
+  tail -n 10 "$AEM_DIR/crx-quickstart/logs/error.log"
+}
+
 enableCRX () {
   echo ""
   echo "Enabling CRX DE..."
-  curl --verbose --user admin:"$ADMIN_PASSWORD" -F "jcr:primaryType=sling:OsgiConfig" -F "alias=/crx/server" -F "dav.create-absolute-uri=true" -F "dav.create-absolute-uri@TypeHint=Boolean" "http://localhost:$AEM_PORT/apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet"
+  curl --verbose --user admin:"$ADMIN_PASSWORD" -F "jcr:primaryType=sling:OsgiConfig" -F "alias=/crx/server" -F "dav.create-absolute-uri=true" -F "dav.create-absolute-uri@TypeHint=Boolean" "http://localhost:$AEM_HTTP_PORT/apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet"
 }
 
 killAEM () {
   echo "AEM process will be terminated..."
-  fuser -TERM --namespace tcp --kill "$AEM_PORT"
+  fuser -TERM --namespace tcp --kill "$AEM_HTTP_PORT"
   echo ""
-  while fuser "$AEM_PORT"/tcp > /dev/null 2>&1; do
+  while fuser "$AEM_HTTP_PORT"/tcp > /dev/null 2>&1; do
       echo "Latest logs:"
       tail -n 5 "$AEM_DIR/crx-quickstart/logs/error.log"
       echo "Waiting for AEM process to be terminated..."
@@ -144,7 +227,7 @@ setPublishReplicationAgentPartOne () {
       -F "transportPassword=admin" \
       -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
       -F "transportUser=admin" \
-      "http://localhost:$AEM_PORT/etc/replication/agents.author/publish/jcr:content")
+      "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.author/publish/jcr:content")
   echo "$curlOutput"
   if echo "$curlOutput" | grep -iq "Content modified"
    then
@@ -166,13 +249,13 @@ setPublishReplicationAgentPartTwo () {
                      --write-out "%{http_code}" \
                      --silent \
                      --output /dev/null \
-                     "http://localhost:${AEM_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
+                     "http://localhost:${AEM_HTTP_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
 
   if [ "$getResponse" -eq 200 ]; then
     # If the resource is available, perform the delete operation:
     curlOutput=$(curl --verbose --user "admin:${ADMIN_PASSWORD}" \
       -F ":operation=delete" \
-      "http://localhost:${AEM_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
+      "http://localhost:${AEM_HTTP_PORT}/etc/replication/agents.author/publish/jcr:content/userId")
     echo "$curlOutput"
 
     # Check if the delete operation succeeded based on the response content:
@@ -199,7 +282,7 @@ setDispatcherReplicationAgent () {
   curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
       -F "transportUri=http://$DISPATCHER_HOSTNAME:80/dispatcher/invalidate.cache" \
       -F "enabled=true" \
-      "http://localhost:$AEM_PORT/etc/replication/agents.author/flush/jcr:content")
+      "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.author/flush/jcr:content")
   echo "$curlOutput"
   if echo "$curlOutput" | grep -iq "Content modified"
    then
@@ -221,7 +304,7 @@ setPublishReverseReplicationAgent () {
         -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
         -F "transportUser=admin" \
         -F "userId=admin" \
-        "http://localhost:$AEM_PORT/etc/replication/agents.author/publish_reverse/jcr:content")
+        "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.author/publish_reverse/jcr:content")
   echo "$curlOutput"
   if echo "$curlOutput" | grep -iq "Content modified"
    then
@@ -266,7 +349,7 @@ setAllReplicationAgentsOnPublish () {
     curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
           -F "enabled=true" \
           -F "userId=admin" \
-          "http://localhost:$AEM_PORT/etc/replication/agents.publish/outbox/jcr:content")
+          "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.publish/outbox/jcr:content")
     echo "$curlOutput"
     if echo "$curlOutput" | grep -iq "Content modified"
      then
@@ -282,7 +365,7 @@ setAllReplicationAgentsOnPublish () {
 
 setMailService() {
   echo "Setting com.day.cq.mailer.DefaultMailService..."
-  curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_PORT/system/console/configMgr/com.day.cq.mailer.DefaultMailService" \
+  curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_HTTP_PORT/system/console/configMgr/com.day.cq.mailer.DefaultMailService" \
   --data-raw 'apply=true&action=ajaxConfigManager&%24location=launchpad%3Aresources%2Finstall%2F20%2Fcq-mailer-5.14.2.jar&smtp.host=fake-smtp-server&smtp.port=8025&smtp.user=myuser&smtp.password=mysecretpassword&from.address=aem-sender%40example.com&smtp.ssl=false&smtp.starttls=false&debug.email=true&debug.email=false&oauth.flow=false&propertylist=oath.flow%2Csmtp.host%2Csmtp.port%2Csmtp.user%2Csmtp.password%2Cfrom.address%2Csmtp.ssl%2Csmtp.starttls%2Cdebug.email%2Coauth.flow'
   # Gives configuration like:
   #  {
@@ -301,20 +384,25 @@ setMailService() {
 warmupScripts() {
   echo ""
   echo "Warming up AEM rendering scripts..."
-  curl --verbose "http://localhost:$AEM_PORT/libs/granite/core/content/login.html" > /dev/null
-  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/aem/start.html" > /dev/null
-  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/sites.html/content" > /dev/null
-  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/assets.html/content/dam" > /dev/null
-  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/aem/forms.html/content/dam/formsanddocuments" > /dev/null
+  curl --verbose "http://localhost:$AEM_HTTP_PORT/libs/granite/core/content/login.html" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/aem/start.html" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/sites.html/content" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/assets.html/content/dam" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/mnt/override/libs/wcm/core/content/common/managepublicationwizard.html" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/aem/forms.html/content/dam/formsanddocuments" > /dev/null
+  if [ "$INSTALL_WKND_SAMPLE" = "true" ]; then
+    curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/content/wknd/language-masters/en.html" > /dev/null
+    curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/editor.html/content/wknd/language-masters/en.html" > /dev/null
+  fi
   sleep 5
 }
 
 disableAuthoringHints() {
   echo ""
   echo "Disabling authoring hints..."
-  ADMIN_USER_JCR_PATH=$(curl --verbose --user "admin:$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/bin/querybuilder.json?path=/home/users&type=rep:User&property=rep:authorizableId&property.value=admin&p.limit=-1" | jq -r '.hits[0].path')
+  ADMIN_USER_JCR_PATH=$(curl --verbose --user "admin:$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/bin/querybuilder.json?path=/home/users&type=rep:User&property=rep:authorizableId&property.value=admin&p.limit=-1" | jq -r '.hits[0].path')
   curl --verbose --user "admin:$ADMIN_PASSWORD" \
-  "http://localhost:$AEM_PORT/$ADMIN_USER_JCR_PATH/preferences" \
+  "http://localhost:$AEM_HTTP_PORT/$ADMIN_USER_JCR_PATH/preferences" \
   -F "jcr:primaryType=nt:unstructured" \
   -F "cq.authoring.editor.page.showOnboarding62=false" \
   -F "cq.authoring.editor.page.showOnboarding62@TypeHint=String" \
@@ -330,6 +418,9 @@ disableAuthoringHints() {
 ###################################
 
 installSearchWebConsolePlugin
+if [ "$INSTALL_WKND_SAMPLE" = "true" ]; then
+  installWKND
+fi
 updateSlingPropsForForms
 
 startAEMInBackground
@@ -348,14 +439,17 @@ killAEM
 setupCryptoKeys
 updateSlingPropsForSQL
 
+startAEMInBackground
+waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_SECOND_AND_SUBSEQUENT_STARTS"
 if [[ "$RUN_MODES" == *"author"* ]]; then
-  startAEMInBackground
-  waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_SECOND_AND_SUBSEQUENT_STARTS"
   setAllReplicationAgentsOnAuthor
   sleep 3
   setMailService
-  # Without this sleep installation of some packages might not be successful:
-  echo "Sleeping for 30 seconds to let AEM be fully initialized..."
-  sleep 30
-  killAEM
 fi
+# Without this sleep installation of some packages might not be successful:
+echo "Sleeping for 20 seconds to let AEM be fully initialized..."
+sleep 20
+enableHTTPS # Must be executed after `setupCryptoKeys`
+echo "Sleeping for 20 seconds to let AEM be fully initialized..."
+sleep 20 # After enabling HTTPS, AEM HTTP service might got stuck
+killAEM
