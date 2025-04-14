@@ -4,8 +4,11 @@ ARG AEM_DIR
 ARG AEM_TYPE
 ARG RUN_MODES
 ARG INSTALL_WKND_SAMPLE
+ARG INSTALL_XWALK_EDS_TEMPLATE
+ARG ENABLE_ACCESS_FOR_REMOTE_UNIVERSAL_EDITOR
 ARG AEM_HTTP_PORT
 ARG AEM_HTTPS_PORT
+ARG UNIVERSAL_EDITOR_SERVICE_PORT
 ARG DEBUG_PORT
 ARG NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START
 ARG NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS
@@ -21,6 +24,9 @@ COPY ../commons/crypto/data ./data
 COPY ../commons/passwordfile.properties .
 COPY ../2_aem/aem-installer.sh .
 COPY ../2_aem/aem-starter.sh .
+
+COPY ../universal-editor-service ./universal-editor-service
+RUN rm universal-editor-service/.gitkeep
 
 RUN java -jar aem-quickstart.jar -unpack
 

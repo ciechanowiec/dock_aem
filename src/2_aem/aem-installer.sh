@@ -27,6 +27,24 @@ installSearchWebConsolePlugin () {
   curl --location "$SEARCH_PLUGIN_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$SEARCH_PLUGIN_DOWNLOAD_URL")"
 }
 
+setUniversalEditorService () {
+  # Docs:
+  # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev
+  # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview
+  echo "Setting up the Universal Editor Service..."
+  if [[ "$RUN_MODES" != *"author"* && "$AEM_TYPE" != "cloud" ]]; then
+    echo "The Universal Editor Service is not supported for this AEM type or run mode and will be removed..."
+    rm -rfv "$AEM_TYPE/universal-editor-service"
+  else
+    openssl req \
+      -newkey rsa:2048 -nodes \
+      -keyout "$AEM_DIR/universal-editor-service/key.pem" \
+      -x509 -days 1825 \
+      -out "$AEM_DIR/universal-editor-service/certificate.pem" \
+      -subj "/C=/ST=/L=/O=/OU=/CN="
+  fi
+}
+
 installWKND() {
   echo "Installing WKND sample project..."
   INSTALL_DIR="$AEM_DIR/crx-quickstart/install"
@@ -411,6 +429,43 @@ disableAuthoringHints() {
   sleep 5
 }
 
+installXWalkEDSTemplate() {
+  echo "Installing XWalk EDS template..."
+  XWALK_EDS_TEMPLATE_DOWNLOAD_URL=$(curl --silent https://api.github.com/repos/adobe-rnd/aem-boilerplate-xwalk/releases/latest \
+    | grep browser_download_url \
+    | grep ".*\.zip" \
+    | cut -d '"' -f 4)
+  echo "Will download the XWalk EDS template from: $XWALK_EDS_TEMPLATE_DOWNLOAD_URL"
+  XWALK_EDS_TEMPLATE="$(mktemp -d)/$(basename "$XWALK_EDS_TEMPLATE_DOWNLOAD_URL")"
+  curl --location "$XWALK_EDS_TEMPLATE_DOWNLOAD_URL" --output "$XWALK_EDS_TEMPLATE"
+  curl --verbose --user "admin:$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/bin/wcm/site-template/import" \
+    -X POST \
+    -F "file=@$XWALK_EDS_TEMPLATE;type=application/zip"
+}
+
+enableAccessForRemoteUniversalEditor() {
+  # Docs: https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview
+  echo "Enabling access for remote Universal Editor..."
+  curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_HTTP_PORT/system/console/configMgr/org.apache.sling.engine.impl.SlingMainServlet" \
+   --data-raw 'apply=true&action=ajaxConfigManager&%24location=&sling.serverinfo=Apache Sling&sling.max.calls=1500&sling.additional.response.headers=X-Content-Type-Options=nosniff&sling.includes.checkcontenttype=false&propertylist=sling.serverinfo%2Csling.max.calls%2Csling.additional.response.headers%2Csling.includes.checkcontenttype'
+  # Gives configuration like:
+  # {
+  #   "sling.serverinfo":"Apache Sling",
+  #   "sling.max.calls:Integer":1500,
+  #   "sling.additional.response.headers":[
+  #     "X-Content-Type-Options=nosniff"
+  #   ],
+  #   "sling.includes.checkcontenttype":false
+  # }
+  curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_HTTP_PORT/system/console/configMgr/com.day.crx.security.token.impl.impl.TokenAuthenticationHandler" \
+   --data-raw 'apply=true&action=ajaxConfigManager&%24location=&token.samesite.cookie.attr=None&token.required.attr=none&propertylist=token.samesite.cookie.attr%2Ctoken.required.attr'
+  # Gives configuration like:
+  # {
+  #   "token.samesite.cookie.attr":"None",
+  #   "token.required.attr":"none"
+  # }
+}
+
 ###################################
 #                                 #
 #          DRIVING CODE           #
@@ -418,6 +473,7 @@ disableAuthoringHints() {
 ###################################
 
 installSearchWebConsolePlugin
+setUniversalEditorService
 if [ "$INSTALL_WKND_SAMPLE" = "true" ]; then
   installWKND
 fi
@@ -428,6 +484,12 @@ waitUntilBundlesStatusMatch "$EXPECTED_BUNDLES_STATUS_AFTER_FIRST_START"
 enableCRX
 warmupScripts
 disableAuthoringHints
+if [ "$INSTALL_XWALK_EDS_TEMPLATE" = "true" ]; then
+  installXWalkEDSTemplate
+fi
+if [ "$ENABLE_ACCESS_FOR_REMOTE_UNIVERSAL_EDITOR" = "true" ]; then
+  enableAccessForRemoteUniversalEditor
+fi
 if [[ "$RUN_MODES" == *"publish"* ]]; then
   setAllReplicationAgentsOnPublish
 fi

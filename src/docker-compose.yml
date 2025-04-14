@@ -84,8 +84,15 @@ services:
         AEM_TYPE: cloud
         RUN_MODES: author,nosamplecontent,local,author-local,docker
         INSTALL_WKND_SAMPLE: false
+        # Docs:
+        # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/edge-delivery/wysiwyg-authoring/edge-dev-getting-started:
+        INSTALL_XWALK_EDS_TEMPLATE: true
+        # Docs:
+        # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview
+        ENABLE_ACCESS_FOR_REMOTE_UNIVERSAL_EDITOR: true
         AEM_HTTP_PORT: 4502
         AEM_HTTPS_PORT: 8443
+        UNIVERSAL_EDITOR_SERVICE_PORT: 8000
         DEBUG_PORT: 8888
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 698
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 698
@@ -97,9 +104,20 @@ services:
       RUN_MODES: author,nosamplecontent,local,author-local,docker
       AEM_HTTP_PORT: 4502
       AEM_HTTPS_PORT: 8443
+      # Docs:
+      # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev:
+      UNIVERSAL_EDITOR_SERVICE_PORT: 8000
       DEBUG_PORT: 8888
       LICENSE_KEY: ${LICENSE_KEY:-}
       SECRETS_DIR: /mnt/secrets
+      # Config for `com.adobe.aem.wcm.franklin.use.Page#editorServiceEndpoint`
+      # and `com.adobe.aem.wcm.franklin.internal.UniversalEditorSettings`. Required for
+      # Universal Editor to work:
+      AEM_XWALK_AUE_ENDPOINT: "https://localhost:8000"
+      # Config for `com.adobe.aem.wcm.franklin.use.Page#editorConnection`
+      # and `/libs/core/franklin/components/page/v1/page/page.html`. Required for
+      # Universal Editor to work:
+      AEM_EXTERNALIZER_AUTHOR: "https://localhost:8443"
     image: aem-author-cloud:latest
     container_name: aem-author-cloud
     volumes:
@@ -121,6 +139,10 @@ services:
     ports:
       - target: 4502
         published: 4502
+        protocol: tcp
+        mode: host
+      - target: 8000
+        published: 8000
         protocol: tcp
         mode: host
       - target: 8443

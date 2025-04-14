@@ -112,6 +112,10 @@ The `src/packages/cloud` directory, in turn, can be populated with these package
 .. `aem-forms-addon-2025.01.22.02-250200.far` (AEM Forms Addon related to AEMaaCS)
 .. `content.zip` (preinstalled content)
 
+. `src/universal-editor-service`
++
+Put the latest version of https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev[local Universal Editor Service] application file, i.e. `universal-editor-service.cjs`, into `src/universal-editor-service` directory in the _Dock AEM_ source code repository. It will be used to start the local Universal Editor Service for `aem-author-cloud` image. The file is git-ignored, so there is no relevant risk of exposing it in the source control.
+
 . `src/commons/crypto`
 +
 An `src/commons/crypto` directory contains a `data` directory with default `hmac` and `master` keys. Those keys are used by `com.adobe.granite.crypto.file` bundle for secrets encoding and default versions of the keys are provided for deterministic and predictable behavior. If it is necessary to use different keys, replace the existing ones with the new ones. However, note that those keys aren't git-ignored, so be careful and don't git commit sensitive secrets.

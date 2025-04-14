@@ -17,6 +17,8 @@ target
 !src/packages/65/.gitkeep
 /src/packages/cloud/*
 !src/packages/cloud/.gitkeep
+/src/universal-editor-service/*
+!src/universal-editor-service/.gitkeep
 /src/secrets/*
 !src/secrets/SAMPLE_AEM_SECRET
 # Compiled documentation:

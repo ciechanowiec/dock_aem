@@ -10,6 +10,23 @@ license.downloadID=$LICENSE_KEY
 EOF
 fi
 
+if [ -e "$AEM_DIR/universal-editor-service/universal-editor-service.cjs" ]; then
+# Docs:
+# https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev
+echo "Setting up Universal Editor Service..."
+cat > "$AEM_DIR/universal-editor-service/.env" << EOF
+UES_PORT=$UNIVERSAL_EDITOR_SERVICE_PORT
+UES_PRIVATE_KEY=./key.pem
+UES_CERT=./certificate.pem
+UES_TLS_REJECT_UNAUTHORIZED=false
+UES_CORS_PRIVATE_NETWORK=true
+EOF
+CURRENT_DIR=$(pwd)
+cd "$AEM_DIR/universal-editor-service" || exit 1
+node "$AEM_DIR/universal-editor-service/universal-editor-service.cjs" &
+cd "$CURRENT_DIR" || exit 1
+fi
+
 echo "Ensuring secrets directory: $SECRETS_DIR..."
 mkdir --parents --verbose "$SECRETS_DIR"
 
