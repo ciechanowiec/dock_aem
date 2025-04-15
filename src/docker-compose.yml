@@ -1,6 +1,7 @@
 x-custom-variables:
   &global-variables
   AEM_PUBLISH_HOSTNAME: aem-publish
+  AEM_PUBLISH_HTTP_PORT: 4503
   DISPATCHER_HOSTNAME: dispatcher
 
 services:
@@ -20,6 +21,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
         AEM_DIR: /opt/aem/author
         AEM_TYPE: 65
         RUN_MODES: author,nosamplecontent,local,author-local,docker
@@ -32,6 +34,8 @@ services:
         LICENSE_KEY: ${LICENSE_KEY:-}
         SECRETS_DIR: /mnt/secrets
     environment:
+      <<: *global-variables
+      IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
       AEM_DIR: /opt/aem/author
       AEM_TYPE: 65
       RUN_MODES: author,nosamplecontent,local,author-local,docker
@@ -80,6 +84,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
         AEM_DIR: /opt/aem/author
         AEM_TYPE: cloud
         RUN_MODES: author,nosamplecontent,local,author-local,docker
@@ -99,6 +104,8 @@ services:
         LICENSE_KEY: ${LICENSE_KEY:-}
         SECRETS_DIR: /mnt/secrets
     environment:
+      <<: *global-variables
+      IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
       AEM_DIR: /opt/aem/author
       AEM_TYPE: cloud
       RUN_MODES: author,nosamplecontent,local,author-local,docker

@@ -10,6 +10,51 @@ license.downloadID=$LICENSE_KEY
 EOF
 fi
 
+if [ -n "$AEM_PUBLISH_HOSTNAME" ]; then
+echo "Removing $AEM_PUBLISH_HOSTNAME from /etc/hosts..."
+sed "/$AEM_PUBLISH_HOSTNAME/d" /etc/hosts > /tmp/hosts
+cp /tmp/hosts /etc/hosts
+fi
+
+if [ "$IS_IDLE_REPLICATION_TO_AEM_PUBLISH" = "true" ] && [ -n "$AEM_PUBLISH_HOSTNAME" ] && [ -n "$AEM_PUBLISH_HTTP_PORT" ]; then
+echo "Starting an idle server on port $AEM_PUBLISH_HTTP_PORT (might be used to consume replication requests in an idle manner)..."
+cat > SimpleServer.java << EOF
+import com.sun.net.httpserver.*;
+import java.io.*;
+import java.net.*;
+public class SimpleServer {
+    public static void main(String[] args) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress($AEM_PUBLISH_HTTP_PORT), 0);
+        server.createContext("/", exchange -> {
+            // Read the request body to avoid filling up TCP buffers
+            try (InputStream in = exchange.getRequestBody()) {
+                // Discard the contents
+                while (in.read() != -1) {
+                    // no-op
+                }
+            }
+
+            // Now produce the response
+            String response = "OK";
+            exchange.sendResponseHeaders(200, response.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        });
+        server.start();
+        Thread.sleep(Long.MAX_VALUE);
+    }
+}
+EOF
+javac SimpleServer.java
+rm SimpleServer.java
+java SimpleServer &
+echo "Adding $AEM_PUBLISH_HOSTNAME to /etc/hosts..."
+echo "127.0.0.1 $AEM_PUBLISH_HOSTNAME" >> /etc/hosts
+echo "Current /etc/hosts:"
+cat /etc/hosts
+fi
+
 if [ -e "$AEM_DIR/universal-editor-service/universal-editor-service.cjs" ]; then
 # Docs:
 # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev

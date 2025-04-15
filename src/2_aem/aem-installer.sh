@@ -243,7 +243,7 @@ setPublishReplicationAgentPartOne () {
   curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
       -F "enabled=true" \
       -F "transportPassword=admin" \
-      -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
+      -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:$AEM_PUBLISH_HTTP_PORT/bin/receive?sling:authRequestLogin=1" \
       -F "transportUser=admin" \
       "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.author/publish/jcr:content")
   echo "$curlOutput"
@@ -319,7 +319,7 @@ setPublishReverseReplicationAgent () {
   curlOutput=$(curl --verbose --user admin:"$ADMIN_PASSWORD" \
         -F "enabled=true" \
         -F "transportPassword=admin" \
-        -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:4503/bin/receive?sling:authRequestLogin=1" \
+        -F "transportUri=http://$AEM_PUBLISH_HOSTNAME:$AEM_PUBLISH_HTTP_PORT/bin/receive?sling:authRequestLogin=1" \
         -F "transportUser=admin" \
         -F "userId=admin" \
         "http://localhost:$AEM_HTTP_PORT/etc/replication/agents.author/publish_reverse/jcr:content")
