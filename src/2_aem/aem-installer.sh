@@ -24,6 +24,10 @@ installSearchWebConsolePlugin () {
     | grep browser_download_url \
     | grep ".jar" \
     | cut -d '"' -f 4)
+  if [ $? -ne 0 ] || [ -z "$SEARCH_PLUGIN_DOWNLOAD_URL" ]; then
+    echo "ERROR: Failed to retrieve the GitHub download URL." >&2
+    exit 1
+  fi
   curl --location "$SEARCH_PLUGIN_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$SEARCH_PLUGIN_DOWNLOAD_URL")"
 }
 
@@ -32,16 +36,16 @@ setUniversalEditorService () {
   # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev
   # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview
   echo "Setting up the Universal Editor Service..."
-  if [[ "$RUN_MODES" != *"author"* && "$AEM_TYPE" != "cloud" ]]; then
-    echo "The Universal Editor Service is not supported for this AEM type or run mode and will be removed..."
-    rm -rfv "$AEM_TYPE/universal-editor-service"
-  else
+  if [[ "$RUN_MODES" == *"author"* && "$AEM_TYPE" == "cloud" ]]; then
     openssl req \
       -newkey rsa:2048 -nodes \
       -keyout "$AEM_DIR/universal-editor-service/key.pem" \
       -x509 -days 1825 \
       -out "$AEM_DIR/universal-editor-service/certificate.pem" \
       -subj "/C=/ST=/L=/O=/OU=/CN="
+  else
+    echo "The Universal Editor Service is not supported for this AEM type or run mode and will be removed..."
+    rm -rfv "$AEM_TYPE/universal-editor-service"
   fi
 }
 
@@ -55,6 +59,10 @@ installWKND() {
       | grep "all-.*\.zip" \
       | grep -v "classic" \
       | cut -d '"' -f 4)
+    if [ $? -ne 0 ] || [ -z "$AEM_GUIDES_DOWNLOAD_URL" ]; then
+      echo "ERROR: Failed to retrieve the GitHub download URL." >&2
+      exit 1
+    fi
     echo "Will download the WKND sample project from: $AEM_GUIDES_DOWNLOAD_URL"
     curl --location "$AEM_GUIDES_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$AEM_GUIDES_DOWNLOAD_URL")"
   elif [ "$AEM_TYPE" = "65" ]; then
@@ -62,6 +70,10 @@ installWKND() {
       | grep browser_download_url \
       | grep "all-.*-classic\.zip" \
       | cut -d '"' -f 4)
+    if [ $? -ne 0 ] || [ -z "$AEM_GUIDES_DOWNLOAD_URL" ]; then
+      echo "ERROR: Failed to retrieve the GitHub download URL." >&2
+      exit 1
+    fi
     echo "Will download the WKND sample project from: $AEM_GUIDES_DOWNLOAD_URL"
     curl --location "$AEM_GUIDES_DOWNLOAD_URL" --output "$INSTALL_DIR/$(basename "$AEM_GUIDES_DOWNLOAD_URL")"
   else
@@ -435,6 +447,10 @@ installXWalkEDSTemplate() {
     | grep browser_download_url \
     | grep ".*\.zip" \
     | cut -d '"' -f 4)
+  if [ $? -ne 0 ] || [ -z "$XWALK_EDS_TEMPLATE_DOWNLOAD_URL" ]; then
+    echo "ERROR: Failed to retrieve the GitHub download URL." >&2
+    exit 1
+  fi
   echo "Will download the XWalk EDS template from: $XWALK_EDS_TEMPLATE_DOWNLOAD_URL"
   XWALK_EDS_TEMPLATE="$(mktemp -d)/$(basename "$XWALK_EDS_TEMPLATE_DOWNLOAD_URL")"
   curl --location "$XWALK_EDS_TEMPLATE_DOWNLOAD_URL" --output "$XWALK_EDS_TEMPLATE"
@@ -471,6 +487,11 @@ enableAccessForRemoteUniversalEditor() {
 #          DRIVING CODE           #
 #                                 #
 ###################################
+
+if [ -z "$LICENSE_KEY" ]; then
+  echo "ERROR: License key isn't set." >&2
+  exit 1
+fi
 
 installSearchWebConsolePlugin
 setUniversalEditorService
