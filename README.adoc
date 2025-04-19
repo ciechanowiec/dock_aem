@@ -259,6 +259,14 @@ docker start solr1 solr2 solr3
 docker stop solr1 solr2 solr3
 ----
 
+=== Universal Editor
+
+`aem-author-cloud` delivers in-built support for editing its local content via Universal Editor as described in https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview[Adobe's documentation] (see environment variables in the `docker-compose.yml` file for more configuration details). However, before the Universal Editor with `aem-author-cloud` can be used, the following manual steps should be performed:
+[upperalpha]
+. Go to https://localhost:8443/aem/start.html in the browser and accept the usage of self-signed certificates.
+. Go to https://localhost:8000/ping in the browser and accept the usage of self-signed certificates.
+. In the Universal Editor define the `Basic YWRtaW46YWRtaW4=` Authentication header as described in the https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview#auth-header[Adobe's documentation].
+
 === AEM Dispatcher & Varnish Cache Specifics
 [upperalpha]
 . AEM Dispatcher and Varnish Cache containers might not run and start if no AEM Publish instance is active. The reason for such behavior is that AEM Dispatcher and Varnish Cache reference an AEM Publish domain name, hence when AEM Publish instance isn't available, the reference is void, which is not supported by AEM Dispatcher or Varnish Cache.
