@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: 1_base/Dockerfile
-    image: ciechanowiec/aem-base:1.0.6
+    image: ciechanowiec/aem-base:1.0.7
     container_name: aem-base
     hostname: aem-base
     networks:
