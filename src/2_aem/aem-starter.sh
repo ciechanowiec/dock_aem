@@ -72,6 +72,18 @@ node "$AEM_DIR/universal-editor-service/universal-editor-service.cjs" &
 cd "$CURRENT_DIR" || exit 1
 fi
 
+if [ -n "$PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY" ] \
+   && [ -d "$PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY/.git" ]; then
+    echo "EDS repository detected at $PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY"
+    echo "Starting EDS proxy..."
+    CURRENT_DIR=$(pwd)
+    cd "$PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY" || exit 1
+    setsid aem up --no-open > eds-proxy.log 2>&1 < /dev/null &
+    cd "$CURRENT_DIR" || exit 1
+else
+    echo "No EDS repository detected. EDS proxy will not be started."
+fi
+
 echo "Ensuring secrets directory: $SECRETS_DIR..."
 mkdir --parents --verbose "$SECRETS_DIR"
 

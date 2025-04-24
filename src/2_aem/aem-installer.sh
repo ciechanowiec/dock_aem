@@ -214,6 +214,14 @@ killAEM () {
   tail -n 5 "$AEM_DIR/crx-quickstart/logs/error.log"
   echo "AEM process has been terminated"
   sleep 5
+
+  echo "Universal Editor Service process will be terminated..."
+  fuser -TERM --namespace tcp --kill "$UNIVERSAL_EDITOR_SERVICE_PORT"
+  echo ""
+  while fuser "$UNIVERSAL_EDITOR_SERVICE_PORT"/tcp > /dev/null 2>&1; do
+      echo "Waiting for Universal Editor Service process to be terminated..."
+      sleep 3
+  done
 }
 
 setupCryptoKeys () {

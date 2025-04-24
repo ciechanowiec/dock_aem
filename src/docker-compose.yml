@@ -97,12 +97,15 @@ services:
         ENABLE_ACCESS_FOR_REMOTE_UNIVERSAL_EDITOR: true
         AEM_HTTP_PORT: 4502
         AEM_HTTPS_PORT: 8443
+        # Docs:
+        # https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/local-dev:
         UNIVERSAL_EDITOR_SERVICE_PORT: 8000
         DEBUG_PORT: 8888
         NUM_OF_EXPECTED_BUNDLES_AFTER_FIRST_START: 700
         NUM_OF_EXPECTED_BUNDLES_AFTER_SECOND_AND_SUBSEQUENT_STARTS: 700
         LICENSE_KEY: ${LICENSE_KEY:-}
         SECRETS_DIR: /mnt/secrets
+        PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY: /mnt/eds-git-repository
     environment:
       <<: *global-variables
       IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
@@ -125,6 +128,7 @@ services:
       # and `/libs/core/franklin/components/page/v1/page/page.html`. Required for
       # Universal Editor to work:
       AEM_EXTERNALIZER_AUTHOR: "https://localhost:8443"
+      PATH_INSIDE_CONTAINER_TO_EDS_GIT_REPOSITORY: /mnt/eds-git-repository
     image: aem-author-cloud:latest
     container_name: aem-author-cloud
     volumes:
@@ -146,6 +150,11 @@ services:
     ports:
       - target: 4502
         published: 4502
+        protocol: tcp
+        mode: host
+        # Default port for EDS proxy (https://github.com/adobe/helix-cli):
+      - target: 3000
+        published: 3000
         protocol: tcp
         mode: host
       - target: 8000
