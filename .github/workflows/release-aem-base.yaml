@@ -28,12 +28,21 @@ jobs:
           docker tag alpine:latest ${{ secrets.DOCKERHUB_USERNAME }}/test-push:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/test-push:latest
           docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/test-push:latest || true
-      - name: Build and Push AEM Base
+      - name: Build and Push AEM Base JVM 11
         run: |
           cd src
           docker buildx create --use
           docker buildx bake \
             --file docker-compose.yml \
-            --set aem-base.platform=linux/amd64,linux/arm64 \
+            --set aem-base-jvm11.platform=linux/amd64,linux/arm64 \
             --push \
-            aem-base
+            aem-base-jvm11
+      - name: Build and Push AEM Base JVM 21
+        run: |
+          cd src
+          docker buildx create --use
+          docker buildx bake \
+            --file docker-compose.yml \
+            --set aem-base-jvm21.platform=linux/amd64,linux/arm64 \
+            --push \
+            aem-base-jvm21

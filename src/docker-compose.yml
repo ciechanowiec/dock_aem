@@ -5,11 +5,25 @@ x-custom-variables:
   DISPATCHER_HOSTNAME: dispatcher
 
 services:
-  aem-base:
+  aem-base-jvm11:
     build:
       context: .
       dockerfile: 1_base/Dockerfile
-    image: ciechanowiec/aem-base:1.0.7
+      args:
+        JAVA_VERSION: 11
+    image: ciechanowiec/aem-base:jvm11-1.0.0
+    container_name: aem-base
+    hostname: aem-base
+    networks:
+      - aem-network
+
+  aem-base-jvm21:
+    build:
+      context: .
+      dockerfile: 1_base/Dockerfile
+      args:
+        JAVA_VERSION: 21
+    image: ciechanowiec/aem-base:jvm21-1.0.0
     container_name: aem-base
     hostname: aem-base
     networks:
@@ -21,6 +35,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        AEM_BASE_IMAGE_VERSION: jvm11-1.0.0
         IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
         AEM_DIR: /opt/aem/author
         AEM_TYPE: 65
@@ -76,7 +91,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   aem-author-cloud:
     build:
@@ -84,6 +99,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        AEM_BASE_IMAGE_VERSION: jvm21-1.0.0
         IS_IDLE_REPLICATION_TO_AEM_PUBLISH: false
         AEM_DIR: /opt/aem/author
         AEM_TYPE: cloud
@@ -170,7 +186,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm21
 
   aem-publish-65:
     build:
@@ -178,6 +194,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        AEM_BASE_IMAGE_VERSION: jvm11-1.0.0
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: 65
         RUN_MODES: publish,nosamplecontent,local,publish-local,docker
@@ -230,7 +247,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   aem-publish-cloud:
     build:
@@ -238,6 +255,7 @@ services:
       dockerfile: 2_aem/Dockerfile
       args:
         <<: *global-variables
+        AEM_BASE_IMAGE_VERSION: jvm21-1.0.0
         AEM_DIR: /opt/aem/publish
         AEM_TYPE: cloud
         RUN_MODES: publish,nosamplecontent,local,publish-local,docker
@@ -290,7 +308,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm21
 
   dispatcher-amd:
     build:
@@ -310,7 +328,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   dispatcher-arm:
     build:
@@ -330,7 +348,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   varnish:
     build:
@@ -349,7 +367,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   solr1:
     build:
@@ -374,7 +392,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
       - zookeeper1
 
   solr2:
@@ -400,7 +418,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
       - zookeeper2
 
   solr3:
@@ -426,7 +444,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
       - zookeeper3
 
   zookeeper1:
@@ -452,7 +470,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   zookeeper2:
     build:
@@ -477,7 +495,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   zookeeper3:
     build:
@@ -502,7 +520,7 @@ services:
         protocol: tcp
         mode: host
     depends_on:
-      - aem-base
+      - aem-base-jvm11
 
   fake-smtp-server:
     environment:

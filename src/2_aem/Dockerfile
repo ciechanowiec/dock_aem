@@ -1,4 +1,6 @@
-FROM ciechanowiec/aem-base:1.0.7
+ARG AEM_BASE_IMAGE_VERSION
+
+FROM ciechanowiec/aem-base:${AEM_BASE_IMAGE_VERSION}
 
 ARG AEM_DIR
 ARG AEM_TYPE

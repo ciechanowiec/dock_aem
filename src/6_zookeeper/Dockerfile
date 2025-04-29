@@ -1,4 +1,4 @@
-FROM ciechanowiec/aem-base:1.0.7
+FROM ciechanowiec/aem-base:jvm11-1.0.0
 
 ARG ZOOKEEPER_DIR
 ARG ZOOKEEPER_MY_ID

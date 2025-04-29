@@ -1,4 +1,6 @@
-FROM eclipse-temurin:11.0.24_8-jdk
+ARG JAVA_VERSION
+
+FROM eclipse-temurin:${JAVA_VERSION}-jdk
 
 COPY ../commons/apt-installer.sh .
 RUN ./apt-installer.sh
