@@ -404,7 +404,7 @@ setAllReplicationAgentsOnPublish () {
 setMailService() {
   echo "Setting com.day.cq.mailer.DefaultMailService..."
   curl --user "admin:$ADMIN_PASSWORD" --verbose "localhost:$AEM_HTTP_PORT/system/console/configMgr/com.day.cq.mailer.DefaultMailService" \
-  --data-raw 'apply=true&action=ajaxConfigManager&%24location=launchpad%3Aresources%2Finstall%2F20%2Fcq-mailer-5.14.2.jar&smtp.host=fake-smtp-server&smtp.port=8025&smtp.user=myuser&smtp.password=mysecretpassword&from.address=aem-sender%40example.com&smtp.ssl=false&smtp.starttls=false&debug.email=true&debug.email=false&oauth.flow=false&propertylist=oath.flow%2Csmtp.host%2Csmtp.port%2Csmtp.user%2Csmtp.password%2Cfrom.address%2Csmtp.ssl%2Csmtp.starttls%2Cdebug.email%2Coauth.flow'
+  --data-raw 'apply=true&action=ajaxConfigManager&%24location=&smtp.host=fake-smtp-server&smtp.password=mysecretpassword&debug.email=true&smtp.port=8025&smtp.user=myuser&from.address=aem-sender@example.com&smtp.ssl=false&smtp.starttls=false&oath.flow=false&propertylist=smtp.host%2Csmtp.password%2Cdebug.email%2Csmtp.port%2Csmtp.user%2Cfrom.address%2Csmtp.ssl%2Csmtp.starttls%2Coath.flow'
   # Gives configuration like:
   #  {
   #    "smtp.host": "fake-smtp-server",
