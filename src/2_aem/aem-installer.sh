@@ -45,7 +45,7 @@ setUniversalEditorService () {
       -subj "/C=/ST=/L=/O=/OU=/CN="
   else
     echo "The Universal Editor Service is not supported for this AEM type or run mode and will be removed..."
-    rm -rfv "$AEM_TYPE/universal-editor-service"
+    rm -rfv "$AEM_DIR/universal-editor-service"
   fi
 }
 
@@ -428,6 +428,7 @@ warmupScripts() {
   curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/assets.html/content/dam" > /dev/null
   curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/mnt/override/libs/wcm/core/content/common/managepublicationwizard.html" > /dev/null
   curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/aem/forms.html/content/dam/formsanddocuments" > /dev/null
+  curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_HTTP_PORT/editor.html/conf/global/settings/workflow/models/request_for_activation.html" > /dev/null
   if [ "$INSTALL_WKND_SAMPLE" = "true" ]; then
     curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/content/wknd/language-masters/en.html" > /dev/null
     curl --verbose --user admin:"$ADMIN_PASSWORD" "http://localhost:$AEM_PORT/editor.html/content/wknd/language-masters/en.html" > /dev/null
