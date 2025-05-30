@@ -142,20 +142,20 @@ The initialization is assumed to be finished when all required bundles have star
 | _AEMaaCS_ +
 - author +
 - nosamplecontent +
-- aem-sdk-quickstart-2025.5.20936.20250519T095350Z-250400.jar +
+- aem-sdk-quickstart-2025.5.21005.20250522T173058Z-250400.jar +
 - aem-forms-addon-2025.04.29.00-250400.far +
 - com.neva.felix.webconsole.plugins.search
-|701
-|701
+|702
+|702
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
-- aem-sdk-quickstart-2025.5.20936.20250519T095350Z-250400.jar +
+- aem-sdk-quickstart-2025.5.21005.20250522T173058Z-250400.jar +
 - aem-forms-addon-2025.04.29.00-250400.far +
 - com.neva.felix.webconsole.plugins.search
-|695
-|695
+|696
+|696
 |===
 +
 [WARNING]
@@ -265,7 +265,20 @@ docker stop solr1 solr2 solr3
 [upperalpha]
 . Go to https://localhost:8443/aem/start.html in the browser and accept the usage of self-signed certificates.
 . Go to https://localhost:8000/ping in the browser and accept the usage of self-signed certificates.
-. In the Universal Editor define the `Basic YWRtaW46YWRtaW4=` Authentication header as described in the https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview#auth-header[Adobe's documentation].
+. When Universal Editor connects to the local `aem-author-cloud` instance, a native login form might appear without the possibility to hover mouse over it. In such a case navigate to the input fields with a `Tab` button and provide credentials of a preferred user. For a default user, use `admin` as a username and `admin` as the password:
++
+image::ue-login-form.png[]
+
+. Authentication Header
+[upperroman]
+.. To enable editing capabilities, define a `Basic` authentication header in the Universal Editor as described in the https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/universal-editor/developer-overview#auth-header[Adobe's documentation].
+.. The header should be defined for the same user as used in the native login form.
+.. For the `admin` user with the password `admin`, the authentication header is `Basic YWRtaW46YWRtaW4=`. For other users the authentication header can be generated with the use of the command constructed the following way:
++
+[source,bash]
+....
+echo -n 'username:password' | base64 | sed 's/^/Basic /'
+....
 
 === AEM Dispatcher & Varnish Cache Specifics
 [upperalpha]
