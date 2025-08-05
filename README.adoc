@@ -109,7 +109,7 @@ Regardless of the host operating system on which the images are built (Windows/m
 
 The `src/packages/cloud` directory, in turn, can be populated with these packages:
 [upperroman]
-.. `aem-forms-addon-2025.03.13.02-250600.far` (AEM Forms Addon related to AEMaaCS)
+.. `aem-forms-addon-2025.06.11.02-250600.far` (AEM Forms Addon related to AEMaaCS)
 .. `content.zip` (preinstalled content)
 
 . `src/universal-editor-service`
@@ -142,20 +142,20 @@ The initialization is assumed to be finished when all required bundles have star
 | _AEMaaCS_ +
 - author +
 - nosamplecontent +
-- aem-sdk-quickstart-2025.6.21193.20250609T124356Z-250600 +
-- aem-forms-addon-2025.03.13.02-250600.far +
+- aem-sdk-quickstart-2025.7.21706.20250723T205632Z-250600.jar +
+- aem-forms-addon-2025.06.11.02-250600.far +
 - com.neva.felix.webconsole.plugins.search
-|702
-|702
+|705
+|705
 
 | _AEMaaCS_ +
 - publish +
 - nosamplecontent +
-- aem-sdk-quickstart-2025.6.21193.20250609T124356Z-250600 +
-- aem-forms-addon-2025.03.13.02-250600.far +
+- aem-sdk-quickstart-2025.7.21706.20250723T205632Z-250600.jar +
+- aem-forms-addon-2025.06.11.02-250600.far +
 - com.neva.felix.webconsole.plugins.search
-|696
-|696
+|699
+|699
 |===
 +
 [WARNING]
